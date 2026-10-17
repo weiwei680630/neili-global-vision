@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>國際新視界</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1f4fa3;
+    --blue-deep:#163a7c;
+    --ink:#ffffff;
+    --zh:"LXGW WenKai TC","Kaiti TC","DFKai-SB","Microsoft JhengHei",serif;
+    --en:"Caveat","LXGW WenKai TC",cursive;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--blue);color:var(--ink);font-family:var(--zh)}
+  #stage{position:fixed;inset:0;background:radial-gradient(ellipse at center,var(--blue) 55%,var(--blue-deep) 100%)}
+  #stage::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+    background-size:44px 44px}
+  #blackout{position:fixed;inset:0;background:#000}
+  #svg{position:fixed;inset:0;width:100%;height:100%}
+  #flash{position:fixed;left:50%;top:50%;width:10vmax;height:10vmax;margin:-5vmax 0 0 -5vmax;border-radius:50%;
+    background:radial-gradient(circle,#fff 0 35%,rgba(255,255,255,.75) 55%,rgba(255,255,255,0) 70%);
+    visibility:hidden;opacity:0;pointer-events:none}
+
+  /* ---------- SVG ink ---------- */
+  #world{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+  #world text{fill:#fff;stroke:none}
+  #world .zh{font-family:var(--zh)}
+  #world .en{font-family:var(--en);font-weight:700}
+  #world .b{font-weight:700}
+  #world .thin{stroke-width:2.2;stroke-opacity:.55}
+  #world .fine{stroke-width:2.6}
+  #world .w{fill:#fff}
+  #world .fb{fill:var(--blue)}
+  #world .t-dash{stroke-width:3;stroke-dasharray:14 12}
+  #world .cube polygon{stroke-width:2.6}
+  #world .cube .top{fill:#3d74d2}
+  #world .cube .l{fill:#2a5db8}
+  #world .cube .r{fill:#1d4996}
+  #world .cube.dark .top{fill:#26457f} #world .cube.dark .l{fill:#1b3568} #world .cube.dark .r{fill:#142a55}
+  #world .cube.white polygon{stroke:#9fb9e8} #world .cube.white .top{fill:#fff} #world .cube.white .l{fill:#e8effb} #world .cube.white .r{fill:#d3e0f5}
+  #world .cube.leaf .top{fill:#5a92e6} #world .cube.leaf .l{fill:#4279d0} #world .cube.leaf .r{fill:#3266b8}
+  #world .cube.trunk .top{fill:#2a5db8} #world .cube.trunk .l{fill:#1f4c9c} #world .cube.trunk .r{fill:#183f86}
+  #world .cube.water .top{fill:#8ab8f5} #world .cube.water .l{fill:#5d93e0} #world .cube.water .r{fill:#4d82d6}
+  #world .nose{fill:#0e214b;stroke-width:1.5}
+  #world .pb{fill:#2c64c6}
+  #world .wind{stroke-width:2;stroke-dasharray:9 15;stroke-opacity:.75}
+
+  /* ---------- page flip ---------- */
+  #flip{position:fixed;inset:0;perspective:1800px;pointer-events:none}
+  .page{position:absolute;inset:0;visibility:hidden;opacity:0;background-color:var(--blue);
+    background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+    background-size:44px 44px;box-shadow:inset 40px 0 80px rgba(0,0,0,.28),inset -10px 0 30px rgba(255,255,255,.08)}
+  .page::after{content:"";position:absolute;right:0;bottom:0;width:9vmin;height:9vmin;
+    background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.85) 50%,#dfe8f8 100%);border-top-left-radius:6px}
+  .pgin{position:absolute;inset:5vmin;border:3px solid #fff;
+    border-radius:36px 10px 28px 12px/12px 30px 10px 34px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vh;text-align:center}
+  .pgin h2{margin:0;font-size:clamp(56px,11vw,170px);font-weight:700;letter-spacing:.08em}
+  .pgin p{margin:0;font-size:clamp(20px,3.2vw,46px)}
+  .pgin small{font-family:var(--en);font-size:clamp(20px,2.8vw,40px);opacity:.85}
+  .pgno{position:absolute;left:3vmin;bottom:2vmin;font-family:var(--en);font-size:clamp(18px,2.4vw,34px);opacity:.8}
+
+  /* ---------- subtitles ---------- */
+  #subs{position:fixed;inset:0;pointer-events:none}
+  .sub{position:absolute;left:16px;right:16px;bottom:calc(9vh + 44px);margin:0;text-align:center;
+    font-size:clamp(20px,3.4vw,52px);line-height:1.35;letter-spacing:.06em;visibility:hidden;opacity:0;
+    text-shadow:0 2px 0 rgba(10,30,80,.55),0 0 18px rgba(10,30,80,.6)}
+  .sub.low{bottom:74px}
+  .en-sub{font-family:var(--en);font-weight:700;font-size:1.15em;letter-spacing:.02em;white-space:nowrap}
+  .sub.top{top:7vh;bottom:auto;font-size:clamp(24px,4.4vw,68px);font-weight:700}
+
+  /* ---------- controls ---------- */
+  #ctrl{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
+    padding:6px 12px;opacity:.55;transition:opacity .3s}
+  #ctrl:hover,#ctrl:focus-within{opacity:1}
+  #ctrl,#scrub{transition:opacity .4s}
+  body.idle #ctrl,body.idle #scrub{opacity:0;pointer-events:none}
+  body.idle{cursor:none}
+  #ctrl button{font-family:var(--en);font-size:20px;line-height:1;color:#fff;background:rgba(255,255,255,.06);
+    border:2px solid #fff;border-radius:255px 15px 225px 15px/15px 225px 15px 255px;
+    min-width:38px;height:38px;cursor:pointer;padding:0 8px}
+  #ctrl button:hover{background:rgba(255,255,255,.18)}
+  #ctrl button.on{background:#fff;color:var(--blue)}
+  #ctrl button[disabled]{opacity:.35;cursor:not-allowed}
+  #dots{display:flex;gap:6px}
+  #dots button{min-width:34px;height:34px;font-size:19px}
+  #ctrl{bottom:30px}
+  #clock{font-family:var(--en);font-size:22px;min-width:118px;text-align:center;font-variant-numeric:tabular-nums;cursor:copy;user-select:none}
+  #scrub{position:fixed;left:16px;right:16px;bottom:4px;height:24px;cursor:pointer;touch-action:none;outline:none}
+  #track{position:absolute;left:0;right:0;top:11px;height:3px;background:rgba(255,255,255,.25);border-radius:2px}
+  #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff;border-radius:2px}
+  #knob{position:absolute;top:50%;left:0;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(31,79,163,.6)}
+  #scrub:focus-visible #knob{box-shadow:0 0 0 3px #fff8}
+  .mark{position:absolute;top:-5px;width:2px;height:13px;margin-left:-1px;background:#fff;opacity:.75}
+  .mark b{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);font:700 12px var(--en);opacity:.9}
+  #tip{position:absolute;bottom:24px;transform:translateX(-50%);background:#fff;color:var(--blue);font:700 15px var(--en);
+    padding:2px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;display:none}
+  #scrub:hover #tip,#scrub.drag #tip{display:block}
+  #toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#fff;color:var(--blue);font:700 16px var(--zh);
+    padding:4px 12px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none}
+  @media (max-width:520px){
+    #ctrl{gap:6px;bottom:28px;flex-wrap:wrap;justify-content:center;width:calc(100% - 32px)}
+    #ctrl button{min-width:32px;height:32px;font-size:17px}
+    #dots button{min-width:28px;height:28px;font-size:16px}
+    .sub{bottom:calc(5vh + 40px)}
+    .sub.low{bottom:76px}
+  }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="blackout"></div>
+
+<svg id="svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+  <defs id="defs">
+    <filter id="rough" filterUnits="userSpaceOnUse" x="-200" y="-200" width="2320" height="1480">
+      <feTurbulence id="turb" type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="1" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g id="world" filter="url(#rough)">
+    <g id="s1">
+      <text id="who" class="en" x="960" y="470" font-size="140" text-anchor="middle"></text>
+      <text id="why" class="zh" x="960" y="650" font-size="92" text-anchor="middle"></text>
+    </g>
+    <g id="school"></g>
+    <g id="earth"></g>
+    <g id="kw"></g>
+    <g id="ant"></g>
+    <g id="tw"></g>
+    <g id="farmWrap"><g id="farmCam"></g></g>
+    <g id="cat"></g>
+    <g id="bear" transform="translate(0,-80)"></g>
+    <g id="s4"></g>
+    <g id="s5"></g>
+    <g id="plane"><g id="planeBob">
+      <!-- invisible, symmetric box: makes the plane's bbox centre = its own centre (0,0), so it pivots on the trail line -->
+      <rect x="-150" y="-45" width="300" height="90" style="fill:none;stroke:none"/>
+      <g transform="scale(1.5)">
+        <path class="wind" d="M-78,-12 L-34,-12"/>
+        <path class="wind" d="M-92,3 L-30,3"/>
+        <path class="wind" d="M-74,17 L-36,17"/>
+        <path class="pb" d="M34,0 L-26,-20 L-13,0 L-26,20 Z"/>
+        <path d="M34,0 L-13,0"/>
+        <path class="pb" d="M-13,0 L-20,11 L34,0 Z"/>
+      </g>
+    </g></g>
+  </g>
+</svg>
+
+<div id="flash"></div>
+
+<div id="flip">
+  <div class="page" id="page1"><div class="pgin">
+    <h2>淺山</h2><p>石虎的家</p><small>Leopard Cat · Shallow Mountains</small>
+  </div><span class="pgno">p.1</span></div>
+  <div class="page" id="page2"><div class="pgin">
+    <h2>森林</h2><p>台灣黑熊的家</p><small>Formosan Black Bear · Forest</small>
+  </div><span class="pgno">p.2</span></div>
+</div>
+
+<div id="subs">
+  <p class="sub" id="sub0">國際新視界從內壢高中出發</p>
+  <p class="sub" id="sub1">從認識社會創新競賽</p>
+  <p class="sub" id="sub2">學會探究問題、解決問題的方法</p>
+  <p class="sub" id="sub3">找到人生的志業</p>
+  <p class="sub" id="sub4">回到台灣，把關心化為行動</p>
+  <p class="sub" id="sub5">沿著田間小路，走進埤塘與里山</p>
+  <p class="sub" id="sub5b">認識台灣瀕臨絕種生物，守護生物多樣性</p>
+  <p class="sub" id="sub6">守護台灣，有我有妳，我們一起努力！</p>
+  <p class="sub low" id="sub7">透過 Minecraft 實現創造力，為生物多樣性發聲</p>
+  <p class="sub low" id="sub8">內高學生舉辦公益營隊</p>
+  <p class="sub low" id="sub9">帶著孩子們，一起共學共好</p>
+</div>
+
+<nav id="ctrl" aria-label="播放控制">
+  <button id="btnPlay" title="暫停 / 播放（空白鍵）" aria-label="暫停">❚❚</button>
+  <div id="dots">
+    <button data-l="s1" title="第一幕 Who am I?">1</button>
+    <button data-l="s2" title="第二幕 起飛到南極">2</button>
+    <button data-l="s3" title="第三幕 回到台灣">3</button>
+    <button data-l="s4" title="第四幕 共學共好">4</button>
+    <button data-l="s5" title="第五幕 歡迎加入">5</button>
+  </div>
+  <button id="btnReplay" title="重播" aria-label="重播">↺</button>
+  <button id="btnMusic" title="背景音樂" aria-label="音樂">♪</button>
+  <span id="clock" title="點一下複製目前時間">0.0s / 0.0s</span>
+</nav>
+<div id="scrub" role="slider" tabindex="0" aria-label="時間軸" aria-valuemin="0">
+  <div id="track"><div id="fill"></div><div id="marks"></div><div id="knob"></div></div>
+  <div id="tip">0.0s</div>
+</div>
+<div id="toast"></div>
+<audio id="bgm" src="小苗快長大 (2).mp3" preload="auto"></audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(MotionPathPlugin);
+const NS = 'http://www.w3.org/2000/svg';
+const $ = s => document.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const r1 = n => Math.round(n * 10) / 10;
+
+/* ================= drawing helpers ================= */
+let seed = 11;
+function rand() { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+
+// Catmull-Rom → cubic Bézier, gives a hand-drawn smooth line through points
+function smooth(p, closed = false) {
+  const n = p.length, g = i => closed ? p[(i + n) % n] : p[Math.max(0, Math.min(n - 1, i))];
+  let d = `M${r1(p[0][0])},${r1(p[0][1])}`;
+  for (let i = 0; i < (closed ? n : n - 1); i++) {
+    const a = g(i - 1), b = g(i), c = g(i + 1), e = g(i + 2);
+    d += ` C${r1(b[0] + (c[0] - a[0]) / 6)},${r1(b[1] + (c[1] - a[1]) / 6)} ${r1(c[0] - (e[0] - b[0]) / 6)},${r1(c[1] - (e[1] - b[1]) / 6)} ${r1(c[0])},${r1(c[1])}`;
+  }
+  return d + (closed ? 'Z' : '');
+}
+const P = (d, cls, extra = '') => `<path d="${d}"${cls ? ` class="${cls}"` : ''}${extra}/>`;
+const circ = (x, y, r, cls) => `<circle cx="${r1(x)}" cy="${r1(y)}" r="${r}"${cls ? ` class="${cls}"` : ''}/>`;
+const txt = (x, y, s, size, cls = 'zh', extra = '') => `<text x="${x}" y="${y}" class="${cls}" font-size="${size}" text-anchor="middle"${extra}>${s}</text>`;
+function blob(cx, cy, r, n = 9, j = .18) {
+  const p = [];
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, rr = r * (1 + (rand() - .5) * 2 * j); p.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]); }
+  return smooth(p, true);
+}
+function wave(x1, x2, y, amp, step) {
+  const p = []; let k = 0;
+  for (let x = x1; x <= x2 + .1; x += step) p.push([x, y + (k++ % 2 ? amp : -amp) * (.6 + rand() * .4)]);
+  return smooth(p);
+}
+const tree = (x, y, s = 1) => P(`M${x},${y} L${x},${y - 62 * s} M${x},${y - 38 * s} L${x + 15 * s},${y - 54 * s}`) + P(blob(x, y - 98 * s, 46 * s, 9, .16));
+const conifer = (x, y, s = 1) => P(`M${x},${y - 210 * s} L${x - 34 * s},${y - 140 * s} L${x - 16 * s},${y - 140 * s} L${x - 54 * s},${y - 70 * s} L${x - 26 * s},${y - 70 * s} L${x - 74 * s},${y - 14 * s} L${x + 74 * s},${y - 14 * s} L${x + 26 * s},${y - 70 * s} L${x + 54 * s},${y - 70 * s} L${x + 16 * s},${y - 140 * s} L${x + 34 * s},${y - 140 * s} Z`) + P(`M${x},${y - 14 * s} L${x},${y}`);
+const cloud = (x, y, s = 1) => P(`M${x - 62 * s},${y} Q${x - 74 * s},${y - 32 * s} ${x - 36 * s},${y - 36 * s} Q${x - 26 * s},${y - 68 * s} ${x + 6 * s},${y - 52 * s} Q${x + 36 * s},${y - 74 * s} ${x + 52 * s},${y - 36 * s} Q${x + 84 * s},${y - 30 * s} ${x + 66 * s},${y} Z`);
+const tuft = (x, y, s = 1) => {
+  let d = `M${r1(x - 12 * s)},${r1(y)} L${r1(x + 12 * s)},${r1(y)}`;
+  for (const [a, l] of [[-62, 15], [-30, 21], [0, 25], [30, 21], [62, 15]]) {
+    const t = a * Math.PI / 180, ex = x + Math.sin(t) * l * s, ey = y - Math.cos(t) * l * s;
+    d += ` M${r1(x + a / 30 * s)},${r1(y)} Q${r1(x + Math.sin(t) * l * s * .3)},${r1(y - l * s * .6)} ${r1(ex)},${r1(ey)}`;
+  }
+  return P(d, 'fine');
+};
+const grass = (x, y, s = 1) => P(`M${x - 8 * s},${y} Q${x - 6 * s},${y - 14 * s} ${x - 14 * s},${y - 24 * s} M${x},${y} Q${x},${y - 18 * s} ${x + 3 * s},${y - 30 * s} M${x + 8 * s},${y} Q${x + 8 * s},${y - 13 * s} ${x + 16 * s},${y - 22 * s}`, 'fine');
+const bush = (x, y, w) => P(`M${x - w},${y} C${x - w},${y - w * 1.1} ${x - w * .2},${y - w * 1.2} ${x},${y - w * .8} C${x + w * .3},${y - w * 1.25} ${x + w},${y - w} ${x + w},${y}`);
+const star = (x, y, r) => P(`M${x},${y - r} Q${x},${y} ${x + r},${y} Q${x},${y} ${x},${y + r} Q${x},${y} ${x - r},${y} Q${x},${y} ${x},${y - r} Z`, 'w');
+const heart = (x, y, s = 1) => P(`M${x},${y + 14 * s} C${x - 34 * s},${y - 8 * s} ${x - 16 * s},${y - 34 * s} ${x},${y - 16 * s} C${x + 16 * s},${y - 34 * s} ${x + 34 * s},${y - 8 * s} ${x},${y + 14 * s} Z`);
+const asterisk = (x, y, s) => P(`M${x - s},${y} L${x + s},${y} M${x},${y - s} L${x},${y + s} M${x - .7 * s},${y - .7 * s} L${x + .7 * s},${y + .7 * s} M${x - .7 * s},${y + .7 * s} L${x + .7 * s},${y - .7 * s}`, 'thin');
+const birds = (x, y, s = 1) => P(`M${x - 14 * s},${y - 6 * s} Q${x - 6 * s},${y - 10 * s} ${x},${y} Q${x + 6 * s},${y - 10 * s} ${x + 14 * s},${y - 6 * s}`, 'fine');
+function fern(x, y, s = 1, dir = 1) {
+  const q = t => [(1 - t) ** 2 * x + 2 * (1 - t) * t * (x + 10 * s * dir) + t * t * (x + 46 * s * dir), (1 - t) ** 2 * y + 2 * (1 - t) * t * (y - 70 * s) + t * t * (y - 104 * s)];
+  let d = `M${x},${y} Q${x + 10 * s * dir},${y - 70 * s} ${x + 46 * s * dir},${y - 104 * s}`;
+  for (let t = .25; t < .95; t += .14) { const [a, b] = q(t), l = 22 * s * (1 - t * .6); d += ` M${r1(a)},${r1(b)} l${r1(-l)},${r1(-l * .45)} M${r1(a)},${r1(b)} l${r1(l)},${r1(-l * .1)}`; }
+  return P(d, 'fine');
+}
+function person(x, y, s = 1, o = {}) {
+  const arms = o.up ? 'M0,-42 L-16,-62 M0,-42 L16,-62' : o.hold ? 'M0,-42 L-18,-32 M0,-42 L18,-32' : 'M0,-42 L-14,-24 M0,-42 L14,-24';
+  let extra = '';
+  if (o.skirt) extra += P('M0,-32 L-11,-16 L11,-16 Z');
+  if (o.tails) extra += P('M-10,-64 q-10,4 -8,14 M10,-64 q10,4 8,14', 'fine');
+  if (o.hat) extra += P('M-30,-66 L0,-88 L30,-66 Z');
+  if (o.cube) extra += `<g class="cube"><polygon class="top" points="0,-96 12,-89 0,-82 -12,-89"/><polygon class="l" points="-12,-89 0,-82 0,-68 -12,-75"/><polygon class="r" points="12,-89 0,-82 0,-68 12,-75"/></g>`;
+  return `<g transform="translate(${r1(x)},${r1(y)}) scale(${s})"><g class="${o.cls || ''}"><g class="kb">${circ(0, -58, 11)}${P(`M0,-47 L0,-20 M0,-20 L-9,0 M0,-20 L9,0 ${arms}`)}${extra}</g></g></g>`;
+}
+function penguin(x, y, s) {
+  return `<g transform="translate(${x},${y}) scale(${s})"><g class="wad">
+    ${P(smooth([[0, -150], [30, -142], [45, -102], [50, -52], [40, -12], [0, 0], [-40, -12], [-50, -52], [-45, -102], [-30, -142]], true), 'fb pbody')}
+    ${P(smooth([[0, -112], [22, -94], [30, -52], [22, -16], [0, -9], [-22, -16], [-30, -52], [-22, -94]], true), 'fine')}
+    ${P('M-45,-96 Q-76,-62 -62,-34')}${P('M45,-96 Q76,-62 62,-34')}
+    ${P('M-26,0 L-10,5 M10,5 L26,0')}
+    ${P('M-9,-114 L0,-100 L9,-114 Z', 'w')}
+    ${circ(-13, -126, 4.5, 'w')}${circ(13, -126, 4.5, 'w')}
+  </g></g>`;
+}
+
+/* ================= scene art ================= */
+// ---------- Scene 2: school ----------
+(() => {
+  let s = P(wave(140, 1780, 862, 5, 120));
+  s += circ(300, 230, 48);
+  for (let a = 0; a < 8; a++) { const t = a / 8 * Math.PI * 2; s += P(`M${r1(300 + Math.cos(t) * 66)},${r1(230 + Math.sin(t) * 66)} L${r1(300 + Math.cos(t) * 92)},${r1(230 + Math.sin(t) * 92)}`, 'fine'); }
+  s += cloud(520, 360, .9) + cloud(1450, 330, .8) + cloud(1760, 250, .55);
+  s += '<rect x="560" y="600" width="800" height="262"/>' + P('M528,600 L1392,600') + P('M560,622 L1360,622', 'thin');
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
+    if ((c === 3 || c === 4) && r > 0) continue;
+    s += `<rect x="${600 + c * 95}" y="${636 + r * 70}" width="50" height="40" rx="3" class="fine"/>` + P(`M${625 + c * 95},${636 + r * 70} L${625 + c * 95},${676 + r * 70}`, 'thin');
+  }
+  s += '<rect x="880" y="440" width="160" height="160"/>' + P('M860,442 L960,368 L1060,442') + circ(960, 494, 30) + P('M960,494 L960,474 M960,494 L975,502', 'fine');
+  s += '<rect x="866" y="728" width="188" height="50" rx="6"/>' + txt(960, 766, '內壢高中', 36, 'zh b');
+  s += P('M918,862 L918,800 L1002,800 L1002,862 M960,800 L960,862');
+  s += tree(300, 862, 1.35) + tree(1560, 862, 1.2) + tree(1440, 862, .8);
+  s += P('M1700,862 L1700,560') + P('M1700,566 C1740,550 1772,590 1822,574 L1822,630 C1772,646 1740,606 1700,622');
+  s += bush(470, 862, 34) + bush(1250, 862, 26) + bush(640, 862, 22);
+  s += `<g id="tgal" class="nodraw">${txt(980, 258, 'Think Global, Act Local!', 92, 'en')}</g>`;
+  $('#school').innerHTML = s;
+})();
+
+// ---------- Scene 2/3: earth ----------
+const TW = [1088, 455];
+(() => {
+  const cx = 960, cy = 540, R = 280;
+  let s = circ(cx, cy, R) + `<circle cx="${cx}" cy="${cy}" r="306" class="thin nodraw" stroke-dasharray="6 14"/>`;
+  for (const lat of [-60, -30, 0, 30, 60]) {
+    const y = cy - R * Math.sin(lat * Math.PI / 180), hw = R * Math.cos(lat * Math.PI / 180);
+    s += P(`M${r1(cx - hw)},${r1(y)} Q${cx},${r1(y + hw * .16)} ${r1(cx + hw)},${r1(y)}`, 'thin');
+  }
+  s += `<ellipse cx="${cx}" cy="${cy}" rx="140" ry="${R}" class="thin"/><ellipse cx="${cx}" cy="${cy}" rx="242" ry="${R}" class="thin"/>` + P(`M${cx},${cy - R} L${cx},${cy + R}`, 'thin');
+  s += P(smooth([[800, 360], [860, 300], [950, 282], [1040, 290], [1110, 330], [1130, 380], [1090, 405], [1060, 418], [1050, 470], [1018, 520], [990, 560], [968, 505], [920, 498], [860, 470], [812, 420]], true));
+  s += P(smooth([[1030, 640], [1090, 615], [1150, 630], [1170, 680], [1130, 720], [1060, 715], [1020, 685]], true));
+  s += P(smooth([[712, 420], [760, 402], [790, 460], [772, 540], [742, 620], [706, 640], [690, 540]], true));
+  s += P(blob(1012, 592, 14, 6, .3)) + P(blob(1052, 604, 11, 6, .3)) + P(blob(1130, 395, 9, 6, .3));
+  s += P(smooth([[790, 760], [840, 748], [890, 762], [950, 744], [1010, 760], [1070, 748], [1130, 760]]));
+  s += P(blob(TW[0], TW[1], 9, 7, .2), 'w');
+  s += `<g class="nodraw">${star(560, 240, 14)}${star(1420, 180, 10)}${star(1500, 860, 12)}${star(420, 640, 9)}</g>`;
+  s += `<g id="twMark" class="nodraw">${circ(TW[0], TW[1], 24, 'fine')}${circ(TW[0], TW[1], 40, 'thin')}${txt(TW[0] + 92, TW[1] - 26, 'Taiwan', 46, 'en')}</g>`;
+  $('#earth').innerHTML = s;
+})();
+
+// ---------- Scene 2: floating keywords ----------
+$('#kw').innerHTML = `
+  <g class="kw" transform="translate(0,110)">${txt(330, 340, 'AI', 140, 'en')}${P('M240,374 C300,392 380,384 430,366', 'fine')}${P('M420,250 l10,-24 M440,262 l22,-12 M436,284 l26,0', 'fine')}</g>
+  <g class="kw">${txt(1600, 300, 'SDGs', 104, 'en')}${P(blob(1600, 268, 120, 10, .12), 'fine')}</g>
+  <g class="kw">${txt(320, 810, 'ESG', 104, 'en')}${P('M230,834 Q320,860 410,830 M246,852 Q320,870 396,848', 'fine')}</g>
+  <g class="kw">${txt(1570, 820, '社會創新競賽', 62, 'zh b')}${P(smooth([[1360, 800], [1420, 752], [1570, 738], [1720, 752], [1782, 800], [1720, 846], [1570, 858], [1420, 846]], true), 'fine')}</g>`;
+
+// ---------- Scene 2: Antarctica ----------
+(() => {
+  // Two copies of each layer side by side → seamless endless scroll (far layer slower = parallax)
+  const tile = (id, art) => `<g id="${id}"><g>${art}</g><g transform="translate(1920,0)">${art}</g></g>`;
+  let far = '';
+  for (let i = 0; i < 3; i++) far += P(wave(0, 1920, 130 + i * 42, 26 - i * 6, 160), 'thin');
+  far += P('M0,760 L90,700 L160,730 L260,610 L330,660 L420,560 L500,640 L560,600 L640,700 L720,760');
+  far += P('M1200,760 L1290,690 L1360,720 L1460,590 L1540,650 L1640,560 L1720,640 L1800,610 L1860,680 L1920,760');
+  far += P('M232,640 L260,610 L290,632 M392,590 L420,560 L452,592 M1432,620 L1460,590 L1494,618 M1610,590 L1640,560 L1672,594', 'fine');
+  far += P('M880,760 L930,722 L980,742 L1040,700 L1100,760', 'thin');
+  let near = P('M140,760 L150,800 L130,822 M480,760 L470,790 M860,760 L875,805 M1340,760 L1328,798 M1700,760 L1712,822', 'fine');
+  near += P(wave(0, 1920, 856, 6, 120), 'fine') + P(wave(0, 1920, 930, 5, 120), 'thin') + P(wave(0, 1920, 1000, 5, 160), 'thin');
+  near += P('M170,940 L210,880 L250,892 L284,858 L338,940') + P('M1000,960 L1030,920 L1066,930 L1090,904 L1130,960', 'fine') + P('M1600,930 L1640,868 L1702,880 L1734,846 L1776,930');
+  let s = '<g class="scenery">' + tile('antFar', far) + P('M0,760 L1920,760') + P('M0,822 L1920,822', 'thin') + tile('antNear', near);
+  s += txt(1600, 480, '南極 Antarctica', 44, 'zh');
+  s += '</g><g class="snow nodraw">';
+  for (let i = 0; i < 34; i++) s += asterisk(r1(rand() * 1920), r1(260 + rand() * 440), 4 + rand() * 4);
+  s += '</g><g class="peng">' + penguin(780, 760, 1) + penguin(890, 760, .6) + penguin(1090, 760, 1.12) + penguin(1250, 760, .88) + '</g>';
+  $('#ant').innerHTML = s;
+})();
+
+// ---------- Scene 3: Taiwan ----------
+const TY = [1010, 250];
+(() => {
+  let s = P(smooth([[1075, 150], [1120, 175], [1135, 215], [1120, 280], [1100, 360], [1085, 450], [1060, 560], [1030, 660], [995, 760], [960, 850], [925, 920], [895, 962], [875, 935], [860, 880], [835, 820], [805, 750], [790, 670], [795, 590], [815, 500], [850, 410], [900, 330], [950, 270], [1000, 215], [1040, 170]], true));
+  s += P('M930,560 L962,500 L992,560 M985,450 L1020,385 L1052,450 M900,660 L930,610 L962,664 M1000,340 L1030,292 L1056,336', 'fine');
+  s += P(blob(720, 590, 12, 6, .3)) + P(blob(742, 622, 8, 6, .3));
+  s += P('M640,300 Q660,290 680,300 M1260,820 Q1280,810 1300,820 M600,760 Q620,750 640,760 M1240,240 Q1262,230 1284,240', 'thin');
+  s += heart(950, 700, 1.2);
+  s += P(`M${TY[0]},${TY[1]} C${TY[0] - 24},${TY[1] - 30} ${TY[0] - 24},${TY[1] - 64} ${TY[0]},${TY[1] - 64} C${TY[0] + 24},${TY[1] - 64} ${TY[0] + 24},${TY[1] - 30} ${TY[0]},${TY[1]} Z`, '', ' id="pin"') + circ(TY[0], TY[1] - 42, 8);
+  s += txt(760, 200, '桃園・內壢', 52, 'zh b') + P('M860,214 Q930,236 984,236', 'fine');
+  s += txt(1330, 560, '台灣', 84, 'zh b') + txt(1330, 620, 'Taiwan', 52, 'en');
+  $('#tw').innerHTML = s;
+})();
+
+// ---------- Scene 3: farmland (two screens wide) ----------
+(() => {
+  const hA = [], hB = [];
+  for (let x = -40; x <= 3880; x += 160) {
+    hA.push([x, 455 - 55 * Math.sin(x / 310) - 22 * Math.sin(x / 120 + 1)]);
+    hB.push([x, 522 - 26 * Math.sin(x / 230 + 2) - 9 * Math.sin(x / 90)]);
+  }
+  const yB = x => 522 - 26 * Math.sin(x / 230 + 2) - 9 * Math.sin(x / 90);
+  let s1 = P(smooth(hA), 'thin') + P(smooth(hB)) + P('M0,562 L3840,562', 'thin');
+  for (let x = 120; x < 3840; x += 280) { const y = yB(x) + 4; s1 += P(`M${x},${r1(y)} L${x},${r1(y - 22)}`, 'fine') + circ(x, y - 36, 14, 'fine'); }
+  s1 += birds(500, 220) + birds(560, 250, .7) + birds(1600, 180, .9) + cloud(1200, 200, .8) + cloud(300, 300, .6);
+  // paddies left of the road
+  s1 += P('M0,606 L880,606 M0,660 L846,660 M0,740 L794,740 M0,850 L716,850 M0,980 L626,980', 'thin');
+  s1 += P('M720,606 L400,1080 M540,606 L-40,1080 M360,606 L-300,920', 'thin');
+  const roadL = y => 892 - (y - 560) * .64;
+  for (const [y, sc] of [[634, .28], [700, .45], [790, .75], [910, 1.1], [1050, 1.5]]) {
+    const sp = 70 * sc + 22;
+    for (let x = 24 + rand() * 10; x < roadL(y) - 40; x += sp) s1 += tuft(x, y, sc);
+  }
+  // pond (埤塘)
+  s1 += '<ellipse cx="1400" cy="760" rx="262" ry="70"/><ellipse cx="1400" cy="760" rx="160" ry="34" class="thin"/><ellipse cx="1400" cy="760" rx="70" ry="13" class="thin"/>';
+  s1 += grass(1150, 744, 1.1) + grass(1640, 744, 1.2) + grass(1260, 822, .9);
+  s1 += P('M1690,700 Q1712,682 1734,694 Q1726,710 1690,700 Z M1730,690 Q1748,666 1736,646 Q1732,636 1744,634 M1744,634 L1768,638 M1704,704 L1702,734 M1714,704 L1718,734');
+  s1 += txt(1400, 640, '埤塘', 46, 'zh b') + txt(1400, 676, 'Ponds of Taoyuan', 30, 'en');
+  s1 += P('M1000,880 L1920,880 M1000,980 L1920,980', 'thin');
+  for (const [y, sc] of [[920, 1.1], [1050, 1.4]]) for (let x = 1040; x < 1900; x += 70 * sc + 24) s1 += tuft(x, y, sc);
+  // screen 2
+  let s2 = '';
+  s2 += P('M1920,860 L3840,860 M1920,980 L3840,980', 'thin');
+  for (const [y, sc] of [[900, 1], [1040, 1.4]]) for (let x = 1950; x < 3820; x += 70 * sc + 26) s2 += tuft(x, y, sc);
+  // 三合院
+  s2 += '<rect x="2400" y="660" width="200" height="100"/>' + P('M2372,662 Q2388,668 2396,640 L2604,640 Q2612,668 2628,662') + P('M2396,640 Q2386,628 2372,616 M2604,640 Q2614,628 2628,616');
+  s2 += '<rect x="2480" y="705" width="40" height="55" class="fine"/><rect x="2424" y="684" width="36" height="30" class="fine"/><rect x="2540" y="684" width="36" height="30" class="fine"/>';
+  s2 += '<rect x="2240" y="690" width="150" height="82"/>' + P('M2228,692 L2250,668 L2392,668 L2398,692');
+  s2 += '<rect x="2610" y="690" width="150" height="82"/>' + P('M2602,692 L2608,668 L2750,668 L2772,692');
+  s2 += P('M2240,772 L2760,772') + txt(2500, 600, '三合院', 46, 'zh b');
+  s2 += tree(2160, 772, 1) + tree(2850, 772, 1.15) + tree(2950, 772, .8);
+  s2 += person(2060, 940, 1.5, { hat: true });
+  // second pond + ducks
+  s2 += '<ellipse cx="3320" cy="800" rx="282" ry="72"/><ellipse cx="3320" cy="800" rx="170" ry="34" class="thin"/>';
+  s2 += P('M3200,800 Q3196,782 3218,786 Q3224,770 3236,778 L3246,780 L3236,786 Q3240,800 3200,800 Z M3330,790 Q3326,772 3348,776 Q3354,760 3366,768 L3376,770 L3366,776 Q3370,790 3330,790 Z');
+  s2 += grass(3060, 790, 1) + grass(3590, 790, 1.1);
+  s2 += txt(3300, 360, '里山 Satoyama', 50, 'zh b') + birds(2600, 240) + birds(2660, 210, .7) + cloud(3000, 220, .7);
+  // route lands → becomes the field road
+  const road = P(smooth([[892, 562], [870, 640], [800, 720], [700, 820], [620, 960], [556, 1100]])) + P(smooth([[908, 562], [905, 640], [860, 720], [800, 820], [780, 960], [800, 1100]])) + P('M884,620 l-8,10 M820,760 l-12,12 M720,900 l-14,14 M660,1020 l-14,14', 'thin');
+  $('#farmCam').innerHTML = `<g class="scn1">${s1}</g><g class="scn2">${s2}</g><g class="road">${road}</g>`;
+})();
+
+// ---------- Scene 3: shallow mountains + leopard cat ----------
+(() => {
+  let s = '<g class="scenery">';
+  s += P(wave(-20, 1940, 520, 40, 220), 'thin') + P(wave(-20, 1940, 640, 30, 170)) + P(wave(0, 1920, 832, 4, 120));
+  s += tree(200, 640, .7) + tree(330, 650, .5) + conifer(1720, 640, .6) + conifer(1820, 650, .45) + tree(1260, 630, .55);
+  s += bush(300, 832, 60) + bush(1180, 832, 40) + bush(1840, 832, 52);
+  for (const x of [120, 520, 640, 1020, 1320, 1700]) s += grass(x, 832, 1.2);
+  for (const x of [440, 1080, 1400]) s += P(`M${x},832 L${x},800`, 'fine') + circ(x, 792, 7, 'fine') + circ(x, 792, 15, 'thin');
+  s += '<rect x="1460" y="560" width="200" height="112" rx="12"/>' + txt(1560, 608, '石虎出沒', 40, 'zh b') + txt(1560, 652, '減速慢行', 32) + P('M1560,672 L1560,832');
+  s += txt(1290, 470, '淺山', 44, 'zh');
+  s += '</g>';
+  const spots = [[-70, -75], [-40, -86], [-10, -70], [20, -88], [50, -72], [-55, -54], [10, -54], [70, -60], [-88, -58], [35, -50]].map(([x, y]) => circ(x, y, 4.5, 'fine')).join('');
+  s += `<g id="lcMove"><g id="lcLabel">${txt(900, 470, '石虎 Leopard Cat', 50, 'zh b')}${P('M900,494 Q940,560 900,610', 'fine')}${P('M886,596 L900,612 L914,598', 'fine')}</g><g transform="translate(800,832) scale(1.3)"><g id="lc">
+    ${P(smooth([[-100, -40], [-110, -70], [-80, -95], [-20, -102], [40, -100], [85, -92], [105, -70], [95, -45], [60, -35], [0, -36], [-60, -34]], true), 'fb')}
+    <g id="lcTail">${P('M-104,-62 C-150,-70 -175,-90 -190,-130')}${P('M-135,-78 L-130,-62 M-162,-92 L-150,-78 M-182,-114 L-168,-106', 'fine')}</g>
+    ${spots}
+    <g class="leg a">${P('M-80,-40 L-84,0 L-72,0')}</g><g class="leg b">${P('M-58,-38 L-56,0 L-44,0')}</g>
+    <g class="leg b">${P('M62,-38 L60,0 L72,0')}</g><g class="leg a">${P('M84,-42 L88,0 L100,0')}</g>
+    ${P(smooth([[100, -100], [104, -128], [125, -140], [152, -138], [170, -122], [174, -102], [160, -86], [135, -82], [112, -88]], true), 'fb')}
+    ${P('M106,-128 Q104,-160 120,-152 Q128,-146 128,-138 M146,-140 Q156,-168 166,-150 Q170,-140 166,-128')}
+    ${circ(115, -146, 3.5, 'w')}${circ(158, -149, 3.5, 'w')}
+    ${P('M128,-136 L131,-118 M142,-137 L141,-118 M115,-98 L104,-94 M118,-92 L106,-86', 'fine')}
+    ${circ(124, -110, 5, 'w')}${circ(152, -110, 5, 'w')}
+    ${P('M163,-100 L171,-100 L167,-95 Z', 'w')}
+    ${P('M167,-95 Q164,-89 158,-90 M167,-95 Q170,-89 176,-91 M174,-97 L204,-102 M174,-93 L204,-90', 'fine')}
+  </g></g></g>`;
+  $('#cat').innerHTML = s;
+})();
+
+// ---------- Scene 3: forest + Formosan black bear ----------
+(() => {
+  // Based on the reference: bear in side view on a sloping log, head raised sniffing toward the light
+  const leaf = (x, y, a, l) => `<path class="fine" transform="translate(${x},${y}) rotate(${a})" d="M0,0 Q${l / 2},${-l * .36} ${l},0 Q${l / 2},${l * .36} 0,0 Z M4,0 L${l * .82},0"/>`;
+  let s = '<g class="scenery">';
+  // light rays from the top-right
+  s += P('M1900,-10 L1470,400 M1920,40 L1560,470 M1920,120 L1650,520 M1860,-10 L1400,330 M1920,220 L1760,530', 'thin');
+  // distant trunks + misty hills
+  s += P('M150,0 C162,300 140,620 158,1000 M206,0 C214,320 198,640 214,990', 'thin') + P('M330,0 C338,260 326,520 340,820 M362,0 C366,280 356,540 368,810', 'thin');
+  s += P(wave(-20, 1940, 640, 26, 240), 'thin');
+  // hanging branches with leaves
+  s += P('M-20,150 C160,90 360,50 600,-10') + P('M180,92 C200,130 210,170 206,210', 'fine');
+  s += leaf(60, 128, 70, 90) + leaf(150, 100, 115, 80) + leaf(250, 76, 60, 96) + leaf(340, 60, 120, 84) + leaf(430, 40, 75, 90) + leaf(206, 210, 95, 70) + leaf(520, 18, 110, 70);
+  s += P('M1940,90 C1800,60 1700,40 1560,-10') + leaf(1860, 70, 100, 84) + leaf(1760, 50, 60, 90) + leaf(1660, 28, 110, 76);
+  for (const [x, y] of [[90, 260], [130, 300], [250, 300], [300, 250], [420, 230], [460, 280]]) s += circ(x, y, 3, 'w');
+  // the sloping log
+  s += P('M-20,1012 C600,940 1300,860 1940,776') + P('M120,1080 C760,1000 1400,930 1940,858');
+  s += P('M160,1000 l60,-8 M420,968 l80,-11 M900,915 l70,-9 M1380,862 l90,-12 M1700,820 l70,-9 M600,990 l50,-7 M1100,930 l60,-8', 'thin');
+  // ferns in front and behind
+  s += fern(400, 1080, 1.3) + fern(560, 1080, 1, -1) + fern(1560, 1080, 1.3, -1) + fern(1720, 1080, 1.5) + fern(1520, 800, 1.1) + fern(1660, 790, 1.2, -1) + fern(260, 960, 1, -1);
+  s += txt(470, 420, '台灣黑熊', 54, 'zh b') + txt(470, 466, 'Formosan Black Bear', 34, 'en') + P('M590,440 Q660,470 700,540', 'fine');
+  s += '</g>';
+  s += `<g id="bearSway"><g id="bearBody">
+    ${P('M810,806 C810,856 812,884 818,900 Q838,914 858,902 C858,870 856,840 856,810', 'fb')}
+    ${P('M1040,800 C1040,840 1042,866 1048,880 Q1068,892 1090,880 C1092,860 1094,830 1094,800', 'fb')}
+    ${P(smooth([[630, 928], [610, 880], [592, 820], [575, 750], [585, 670], [630, 615], [720, 585], [840, 570], [960, 548], [1040, 535], [1100, 505], [1140, 465], [1190, 440], [1245, 442], [1300, 458], [1340, 470], [1338, 492], [1300, 505], [1255, 520], [1210, 545], [1180, 580], [1165, 640], [1165, 720], [1175, 790], [1185, 850], [1210, 868], [1170, 876], [1110, 876], [1104, 830], [1094, 800], [1060, 796], [1000, 806], [900, 813], [800, 808], [762, 816], [752, 860], [750, 905], [772, 920], [700, 929]], true), 'fb')}
+    ${P('M690,690 C735,730 760,775 760,816 M1056,600 C1086,660 1098,740 1096,800', 'thin')}
+    ${P('M1180,877 l4,9 M1192,875 l4,9 M1204,871 l4,9 M648,929 l-3,9 M664,929 l-3,9 M680,929 l-3,9', 'fine')}
+    ${P('M1135,478 C1115,450 1132,422 1160,430 C1173,436 1173,452 1166,460', 'fb')}${P('M1143,462 C1139,448 1149,440 1160,446', 'thin')}
+    <path class="w" style="fill-opacity:.28" d="M1272,452 C1300,458 1320,464 1340,470 C1344,480 1342,488 1338,492 C1318,498 1300,503 1282,510 C1270,492 1268,470 1272,452 Z"/>
+    ${P('M1272,452 C1268,470 1270,492 1282,510', 'fine')}
+    ${P('M1326,466 C1342,462 1352,470 1348,482 C1342,489 1330,484 1326,466 Z', 'w')}
+    ${P('M1282,510 C1300,505 1315,500 1332,494', 'fine')}
+    ${circ(1240, 470, 6.5, 'w')}
+    ${P('M680,650 l18,-10 M790,612 l20,-6 M900,600 l18,-8 M1000,580 l16,-10 M630,740 l12,-12 M940,660 l16,-8 M840,700 l16,-6 M1190,520 l12,-6 M650,830 l10,-10', 'thin')}
+    <path id="bearV" class="w" d="M1110,590 C1126,640 1146,672 1166,690 L1166,656 C1150,642 1132,618 1124,586 Z"/>
+  </g></g>
+  <g id="hearts" class="nodraw">${heart(1400, 400, 1.1)}${heart(1480, 340, .9)}${heart(1390, 300, 1.3)}</g>`;
+  $('#bear').innerHTML = s;
+})();
+
+// ---------- Scene 4: blocks + camp ----------
+const iso = (i, j, k) => [960 + (i - j) * 31.18, 660 + (i + j) * 18 - k * 36];
+const pt = p => p.map(r1).join(',');
+function cube(c) {
+  const { i, j, k, w } = c, h = c.h || 1, i1 = i + w, j1 = j + w, k1 = k + h;
+  const top = [iso(i, j, k1), iso(i1, j, k1), iso(i1, j1, k1), iso(i, j1, k1)];
+  const rt = [iso(i1, j, k), iso(i1, j1, k), iso(i1, j1, k1), iso(i1, j, k1)];
+  const lf = [iso(i, j1, k), iso(i1, j1, k), iso(i1, j1, k1), iso(i, j1, k1)];
+  return `<g class="cube ${c.kind || ''}" data-set="${c.set}" data-n="${c.n}"><polygon class="top" points="${top.map(pt).join(' ')}"/><polygon class="l" points="${lf.map(pt).join(' ')}"/><polygon class="r" points="${rt.map(pt).join(' ')}"/></g>`;
+}
+// a flat patch on the +i ("right") face of a block, for eyes / nose
+const rface = (i, j0, j1, k0, k1, cls) => `<polygon class="${cls}" points="${[iso(i, j0, k0), iso(i, j1, k0), iso(i, j1, k1), iso(i, j0, k1)].map(pt).join(' ')}"/>`;
+const KIDS = [];
+(() => {
+  const cubes = [], add = (set, kind, i, j, k, w = 1, h = 1) => cubes.push({ set, kind, i, j, k, w, h });
+  // 台灣黑熊 (blocky, facing +i toward the pond): legs, body, white V chest, head, ears, light muzzle, tail
+  for (const [i, j] of [[-4, -3], [-4, -2], [-1, -3], [-1, -2]]) add('b', 'dark', i, j, 0);
+  for (let k = 1; k <= 2; k++) for (let i = -4; i <= -1; i++) for (let j = -3; j <= -2; j++) add('b', i === -1 && k === 1 ? 'white' : 'dark', i, j, k);
+  for (let k = 2; k <= 3; k++) for (let j = -3; j <= -2; j++) add('b', 'dark', 0, j, k);
+  add('b', 'dark', 0, -3, 4, .5, .5); add('b', 'dark', 0, -1.5, 4, .5, .5);
+  add('b', 'white', 1, -2.4, 2, .8, .7);
+  add('b', 'dark', -4.5, -2.75, 2, .5, .5);
+  // 森林: three blocky trees (one tall)
+  const treeAt = (ci, cj, trunkH, conifer) => {
+    for (let k = 0; k < trunkH; k++) add('f', 'trunk', ci, cj, k);
+    for (let i = ci - 1; i <= ci + 1; i++) for (let j = cj - 1; j <= cj + 1; j++) add('f', 'leaf', i, j, trunkH);
+    if (conifer) {   // tapering layers: cross, then a tip
+      for (const [di, dj] of [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]]) add('f', 'leaf', ci + di, cj + dj, trunkH + 1);
+      add('f', 'leaf', ci, cj, trunkH + 2); add('f', 'leaf', ci, cj, trunkH + 3);
+    } else add('f', 'leaf', ci, cj, trunkH + 1);
+  };
+  treeAt(-5, 1, 2); treeAt(-1, 4, 2); treeAt(-5, 5, 2, true);
+  // 埤塘: shallow water tiles with rounded corners
+  for (let i = 2; i <= 5; i++) for (let j = -4; j <= 0; j++) if (!((i === 2 || i === 5) && (j === -4 || j === 0))) add('p', 'water', i, j, 0, 1, .22);
+  cubes.forEach((c, n) => c.n = n);
+  cubes.sort((a, b) => a.k - b.k || (a.i + a.w / 2 + a.j + a.w / 2) - (b.i + b.w / 2 + b.j + b.w / 2));
+
+  let g = '';
+  for (let n = -6; n <= 6; n++) g += P(`M${pt(iso(n, -6, 0))} L${pt(iso(n, 6, 0))} M${pt(iso(-6, n, 0))} L${pt(iso(6, n, 0))}`, 'thin');
+  g += P(`M${pt(iso(-6, -6, 0))} L${pt(iso(6.5, -6, 0))} L${pt(iso(6.5, 6.5, 0))} L${pt(iso(-6, 6.5, 0))} Z`);
+  g += cloud(300, 200, .8) + cloud(1600, 160, .7) + birds(1450, 260) + birds(1500, 290, .7);
+
+  // bear face details + pond ripples/reeds, appear after the blocks land
+  const face = rface(1, -2.62, -2.36, 3.35, 3.62, 'w') + rface(1, -1.64, -1.38, 3.35, 3.62, 'w') + rface(1.8, -2.18, -1.82, 2.4, 2.66, 'nose');
+  const pc = iso(3.5, -2, .22);
+  const pond = `<ellipse cx="${r1(pc[0])}" cy="${r1(pc[1])}" rx="56" ry="20" class="thin"/><ellipse cx="${r1(pc[0])}" cy="${r1(pc[1])}" rx="26" ry="9" class="thin"/>` +
+    grass(...iso(6, -2, 0), .9) + grass(...iso(4.5, 1, 0), .8) + grass(...iso(6, -4, 0), .7);
+  const tags = txt(1010, 400, '台灣黑熊', 40, 'zh b') + txt(600, 400, '森林', 40, 'zh b') + txt(1330, 600, '埤塘', 40, 'zh b');
+
+  let camp = P('M1530,742 L1650,560 L1770,742 Z') + P('M1650,560 L1620,742 M1650,560 L1680,742') + P('M1650,560 L1650,520 L1688,532 L1650,544');
+  camp += P('M230,762 L230,430') + P('M230,440 C300,424 420,456 530,440 L530,512 C420,528 300,496 230,512') + txt(380, 490, '內高公益營隊', 38, 'zh b');
+
+  const students = person(520, 720, 1.6, { up: true, cube: true, cls: 'st' }) + person(1370, 760, 1.6, { up: true, cube: true, cls: 'st' });
+
+  let kids = '';
+  for (let n = 0; n < 12; n++) {
+    const a = Math.PI * (.06 + .88 * n / 11), x = 960 - 610 * Math.cos(a), y = 842 + 40 * Math.sin(a);
+    KIDS.push([x, y]);
+    kids += person(x, y, 1.05, { hold: true, cls: 'kid ' + (x < 960 ? 'kl' : 'kr'), skirt: n % 3 === 1, tails: n % 3 === 1 });
+  }
+  const hands = smooth(KIDS.flatMap(([x, y]) => [[x - 18.9, y - 33.6], [x + 18.9, y - 33.6]]));
+
+  $('#s4').innerHTML = `<g id="grid">${g}</g><g id="cubes" class="nodraw">${cubes.map(cube).join('')}</g>
+    <g id="bearFace" class="nodraw">${face}</g>
+    <g id="pondFx">${pond}</g>
+    <g id="tags" class="nodraw">${tags}</g>
+    <g id="camp">${camp}</g>
+    <g id="students" class="nodraw">${students}</g>
+    <g id="kids" class="nodraw">${kids}</g>
+    <path id="hands" d="${hands}" class="fine"/>
+    <g id="sparks" class="nodraw">${star(200, 560, 18)}${star(1760, 420, 22)}${star(1500, 860, 14)}${star(420, 880, 14)}</g>`;
+})();
+
+// ---------- Scene 5: welcome ----------
+$('#s5').innerHTML = `
+  <defs><clipPath id="c5"><rect id="c5r" x="0" y="0" width="0" height="1080"/></clipPath></defs>
+  <g clip-path="url(#c5)">
+    ${txt(960, 430, '歡迎加入', 100, 'zh', ' letter-spacing="14"')}
+    ${txt(960, 630, '國際新視界', 184, 'zh b', ' letter-spacing="16"')}
+  </g>
+  <g id="ul5">${P('M500,684 C760,716 1120,652 1420,692')}${P('M600,716 C860,734 1080,704 1310,720', 'thin')}</g>
+  <g id="stars5" class="nodraw">${star(430, 360, 26)}${star(1500, 330, 20)}${star(1480, 760, 16)}${star(380, 740, 14)}${star(1640, 520, 12)}</g>
+  <text id="en5" x="960" y="820" class="zh b" font-size="58" text-anchor="middle" letter-spacing="6">一起認真的玩、快樂的學！</text>`;
+
+// Scene 1 per-character text
+$('#who').innerHTML = [...'Who am I ?'].map(c => `<tspan>${c === ' ' ? '&#160;' : c}</tspan>`).join('');
+$('#why').innerHTML = [...'多元選修到底要選什麼？'].map(c => `<tspan>${c}</tspan>`).join('');
+
+/* ================= timeline ================= */
+const tl = gsap.timeline({ paused: true });
+const GEOM = 'path,line,circle,ellipse,rect,polyline,polygon';
+const roots = sel => typeof sel === 'string' ? $$(sel) : [].concat(sel);
+
+// Hand-draw every stroke under `sel`; white fills & text fade in near the end.
+function draw(sel, at, dur = 1.5, ease = 'power1.inOut') {
+  const els = [], fills = [];
+  for (const r of roots(sel)) {
+    const all = r.matches(GEOM) ? [r] : $$(GEOM + ',text', r);
+    for (const e of all) {
+      if (e.closest('.nodraw') && !r.classList.contains('nodraw') || e.closest('defs')) continue;
+      if (e.tagName === 'text' || e.classList.contains('w')) fills.push(e); else els.push(e);
+    }
+  }
+  els.forEach(e => {
+    if (e.__len == null) { const L = Math.ceil(e.getTotalLength()) + 2; e.__len = L; e.style.strokeDasharray = `${L} ${L + 20}`; e.style.strokeDashoffset = L + 5; }
+  });
+  const st = Math.min(.05, dur * .55 / Math.max(1, els.length));
+  if (els.length) tl.fromTo(els, { strokeDashoffset: (i, e) => e.__len + 5 }, { strokeDashoffset: 0, duration: Math.max(.25, dur - st * (els.length - 1)), stagger: st, ease }, at);
+  if (fills.length) tl.fromTo(fills, { autoAlpha: 0 }, { autoAlpha: 1, duration: .5, stagger: .05 }, at + dur * .65);
+}
+
+// Paper plane along a path, with a dashed trail revealed through a mask.
+let trailId = 0;
+function fly(d, at, dur, { parent, scale = 1, ease = 'power1.inOut', phase = 0 } = {}) {
+  tl.set('#plane', { autoAlpha: 1, scale }, at);
+  tl.to('#plane', { motionPath: { path: d, autoRotate: true }, duration: dur, ease }, at);
+  return parent ? dashed(d, parent, at, dur, ease, phase) : null;
+}
+// phase: length of the trail this one continues, so the 14/12 dash rhythm carries on seamlessly
+function dashed(d, parent, at, dur, ease = 'power1.inOut', phase = 0) {
+  const id = 'm' + (++trailId);
+  const m = document.createElementNS(NS, 'mask');
+  m.id = id; m.setAttribute('maskUnits', 'userSpaceOnUse');
+  m.setAttribute('x', -600); m.setAttribute('y', -600); m.setAttribute('width', 5200); m.setAttribute('height', 2400);
+  m.innerHTML = `<path d="${d}" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>`;
+  $('#defs').appendChild(m);
+  const p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d); p.setAttribute('class', 't-dash nodraw'); p.setAttribute('mask', `url(#${id})`);
+  $(parent).appendChild(p);
+  const L = Math.ceil(p.getTotalLength()) + 2, mp = m.firstChild;
+  mp.style.strokeDasharray = `${L} ${L + 60}`;
+  if (phase) p.style.strokeDashoffset = -(phase % 26);
+  p.__trailLen = phase + p.getTotalLength();
+  tl.fromTo(mp, { strokeDashoffset: L + 30 }, { strokeDashoffset: 0, duration: dur, ease }, at);
+  return p;
+}
+function sub(id, tin, tout) {
+  tl.fromTo('#' + id, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'power2.out' }, tin);
+  tl.to('#' + id, { autoAlpha: 0, y: -12, duration: .5, ease: 'power1.in' }, tout - .5);
+}
+function pageFlip(id, at, hide, show) {
+  tl.set(id, { transformOrigin: '0% 50%', rotationY: 90 }, at);
+  tl.to(id, { autoAlpha: 1, duration: .12 }, at);
+  tl.to(id, { rotationY: 0, duration: .7, ease: 'power2.out' }, at);
+  tl.set(hide, { autoAlpha: 0 }, at + .7);
+  tl.set(show, { autoAlpha: 1 }, at + .7);
+  tl.set(id, { transformOrigin: '100% 50%' }, at + 1.5);
+  tl.to(id, { rotationY: -90, duration: .7, ease: 'power2.in' }, at + 1.5);
+  tl.set(id, { autoAlpha: 0 }, at + 2.2);
+}
+
+gsap.set(['#school', '#earth', '#kw', '#ant', '#tw', '#farmWrap', '#cat', '#bear', '#s4', '#s5', '#plane', '#twMark', '#bearV', '#hearts', '.sub', '.page'], { autoAlpha: 0 });
+gsap.set('#plane', { transformOrigin: '50% 50%' });
+gsap.set('#lc .leg', { transformOrigin: '50% 0%' });
+gsap.set(['.wad', '#bearSway'], { transformOrigin: '50% 100%' });
+
+// ---------- 第一幕 Who am I? ----------
+tl.addLabel('s1', 0);
+tl.fromTo('#who tspan', { attr: { 'fill-opacity': 0 } }, { attr: { 'fill-opacity': 1 }, duration: .3, stagger: .09 }, 1.6);
+tl.fromTo('#who', { y: 24 }, { y: 0, duration: 1.4, ease: 'power2.out' }, 1.6);
+tl.fromTo('#why tspan', { attr: { 'fill-opacity': 0 } }, { attr: { 'fill-opacity': 1 }, duration: .35, stagger: .12 }, 3.1);
+tl.fromTo('#flash', { scale: 0, autoAlpha: 1 }, { scale: 32, duration: 1.1, ease: 'power2.in' }, 5.6);
+tl.set(['#blackout', '#s1'], { autoAlpha: 0 }, 6.6);
+tl.set('#school', { autoAlpha: 1 }, 6.6);
+tl.to('#flash', { autoAlpha: 0, duration: .9 }, 6.65);
+
+// ---------- 第二幕 紙飛機起飛 → 地球 → 南極 ----------
+tl.addLabel('s2', 6.6);
+draw('#school', 6.8, 2.6);
+sub('sub0', 7.6, 11.4);
+tl.fromTo('#tgal', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: .7, ease: 'back.out(1.6)' }, 7.8);
+const P1 = 'M440,846 C620,846 760,780 880,640 S1180,240 1500,90 S1880,-60 2060,-120';
+fly(P1, 9.4, 2.4, { parent: '#school', scale: 1 });
+tl.to('#school', { scale: .12, autoAlpha: 0, svgOrigin: '960 700', duration: 1.2, ease: 'power2.in' }, 11.0);
+tl.set('#earth', { autoAlpha: 1 }, 11.5);
+draw('#earth', 11.5, 1.8);
+sub('sub1', 11.7, 14.8);
+const P2 = 'M-80,260 C300,60 1300,20 1560,300 C1780,560 1500,900 1180,930 C1060,945 990,940 960,900';
+const trail2 = fly(P2, 12.8, 4.3, { parent: '#earth', scale: .75 });
+tl.set('#kw', { autoAlpha: 1 }, 13.2);
+tl.fromTo('.kw', { autoAlpha: 0, scale: .3 }, { autoAlpha: 1, scale: 1, transformOrigin: '50% 50%', duration: .6, stagger: .4, ease: 'back.out(2)' }, 13.2);
+tl.to('.kw', { y: '-=18', rotation: 3, duration: 1.1, yoyo: true, repeat: 2, ease: 'sine.inOut', stagger: .2 }, 14.0);
+sub('sub2', 15.0, 19.6);
+tl.to('.kw', { autoAlpha: 0, scale: .6, duration: .6, stagger: .1 }, 17.3);
+tl.set('#plane', { autoAlpha: 0 }, 17.2);
+tl.to('#earth', { scale: 4.5, svgOrigin: '960 800', duration: 1.3, ease: 'power2.in' }, 17.5);
+tl.to('#earth', { autoAlpha: 0, duration: .55, ease: 'power1.in' }, 17.85);
+tl.set('#ant', { autoAlpha: 1 }, 18.4);
+draw('#ant .scenery', 18.4, 1.8);
+tl.fromTo('#antFar', { x: 0 }, { x: -760, duration: 7.6, ease: 'none' }, 18.4);
+tl.fromTo('#antNear', { x: 0 }, { x: -1920, duration: 7.6, ease: 'none' }, 18.4);
+tl.fromTo('#ant .snow', { autoAlpha: 0, y: -30 }, { autoAlpha: 1, y: 40, duration: 6, ease: 'none' }, 18.6);
+const P3 = 'M-120,200 C150,170 350,300 600,300';
+const tr3 = fly(P3, 18.6, 2.0, { parent: '#ant', scale: 1, ease: 'none' });
+// from 20.6s: keep flying straight ahead, level (no turning), easing into the take-off
+const tr3b = fly('M600,300 L1460,300', 20.6, 4.0, { parent: '#ant', scale: 1, ease: 'power1.out', phase: tr3.__trailLen });
+draw('#ant .peng', 20.0, 1.4);
+tl.fromTo('#ant .pbody', { fillOpacity: 0 }, { fillOpacity: 1, duration: .6 }, 20.2);
+sub('sub3', 20.2, 24.5);
+tl.fromTo('.wad', { rotation: -6 }, { rotation: 6, duration: .35, yoyo: true, repeat: 13, ease: 'sine.inOut', stagger: .12 }, 20.4);
+
+// ---------- 第三幕 回到台灣，把關心化為行動 ----------
+tl.addLabel('s3', 24.6);
+const P4 = 'M1460,300 C1640,300 1790,160 2060,-80';
+fly(P4, 24.6, 1.3, { parent: '#ant', scale: 1, ease: 'power2.in', phase: tr3b.__trailLen });
+tl.to('#ant', { autoAlpha: 0, duration: .6 }, 25.3);
+tl.set('#earth', { scale: 1, svgOrigin: '960 800' }, 25.9);
+tl.set(trail2, { autoAlpha: 0 }, 25.9);
+tl.to('#earth', { autoAlpha: 1, duration: .6 }, 26.0);
+tl.fromTo('#twMark', { autoAlpha: 0 }, { autoAlpha: 1, duration: .6 }, 26.4);
+tl.fromTo('#twMark circle', { attr: { r: 4 } }, { attr: { r: (i) => i ? 40 : 24 }, duration: .9, ease: 'back.out(2)' }, 26.4);
+sub('sub4', 26.3, 31.8);
+// paths end one nose-length short so the plane's nose (not its centre) touches the target
+const P5 = 'M960,1000 C1300,1000 1520,800 1460,600 C1410,460 1260,425 1120,448';
+fly(P5, 26.4, 2.4, { parent: '#earth', scale: .6 });
+tl.set('#plane', { autoAlpha: 0 }, 28.9);
+tl.to('#earth', { scale: 9, svgOrigin: `${TW[0]} ${TW[1]}`, duration: 1.2, ease: 'power2.in' }, 28.9);
+tl.to('#earth', { autoAlpha: 0, duration: .5, ease: 'power1.in' }, 29.15);
+tl.set('#tw', { autoAlpha: 1 }, 29.7);
+draw('#tw', 29.7, 1.6);
+fly(`M1760,-60 C1500,60 1270,140 ${TY[0] + 44},${TY[1] - 20}`, 30.4, 1.4, { parent: '#tw', scale: .9, ease: 'power2.out' });
+tl.to('#plane', { scale: .25, autoAlpha: 0, duration: .4 }, 31.6);
+tl.fromTo('#pin', { y: -30 }, { y: 0, duration: .6, ease: 'bounce.out' }, 31.4);
+tl.to('#tw', { scale: 7, svgOrigin: `${TY[0]} ${TY[1]}`, duration: 1.1, ease: 'power2.in' }, 32.2);
+tl.to('#tw', { autoAlpha: 0, duration: .5, ease: 'power1.in' }, 32.45);
+tl.set('#farmWrap', { autoAlpha: 1 }, 32.9);
+draw('#farmCam .road', 32.95, 1.1);
+draw('#farmCam .scn1', 33.2, 2.4);
+sub('sub5', 34.6, 41.6);
+tl.to('#farmCam', { x: -1920, duration: 5.6, ease: 'sine.inOut' }, 36.3);
+draw('#farmCam .scn2', 36.6, 3.6);
+fly('M-120,300 C400,180 900,320 1300,230 S1800,160 2060,200', 36.6, 5.0, { parent: '#farmWrap', scale: .8 });
+pageFlip('#page1', 41.9, ['#farmWrap', '#plane'], '#cat');
+draw('#cat .scenery', 43.5, 1.4);
+tl.fromTo('#lcMove', { x: -1300 }, { x: 0, duration: 3.4, ease: 'none' }, 43.6);
+tl.fromTo('#lc .leg.a', { rotation: -20 }, { rotation: 20, duration: .2, yoyo: true, repeat: 16, ease: 'sine.inOut' }, 43.6);
+tl.fromTo('#lc .leg.b', { rotation: 20 }, { rotation: -20, duration: .2, yoyo: true, repeat: 16, ease: 'sine.inOut' }, 43.6);
+tl.fromTo('#lc', { y: 0 }, { y: -4, duration: .2, yoyo: true, repeat: 16, ease: 'sine.inOut' }, 43.6);
+tl.fromTo('#lcTail', { rotation: 0 }, { rotation: 8, svgOrigin: '-104 -62', duration: .5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 47.0);
+sub('sub5b', 45.8, 50.2);
+pageFlip('#page2', 48.0, '#cat', '#bear');
+draw('#bear .scenery', 49.5, 1.4);
+draw('#bearBody', 49.8, 1.8);
+tl.fromTo('#bearV', { autoAlpha: 0, scale: .6 }, { autoAlpha: 1, scale: 1, transformOrigin: '50% 50%', duration: .7, ease: 'back.out(2)' }, 51.4);
+tl.fromTo('#bearSway', { scaleY: 1 }, { scaleY: 1.02, duration: .9, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 51.6);
+sub('sub6', 50.6, 56.4);
+tl.set('#hearts', { autoAlpha: 1 }, 52.0);
+tl.fromTo('#hearts path', { autoAlpha: 0, y: 20, scale: .3, transformOrigin: '50% 50%' }, { autoAlpha: 1, y: -50, scale: 1, duration: 1.4, stagger: .4, ease: 'power1.out' }, 52.0);
+
+// ---------- 第四幕 動手創造、公益營隊 ----------
+tl.addLabel('s4', 56.4);
+tl.to('#bear', { autoAlpha: 0, duration: .6 }, 56.4);
+tl.set('#s4', { autoAlpha: 1 }, 57.0);
+draw('#grid', 57.0, 1.2);
+sub('sub7', 57.4, 61.7);
+tl.fromTo('#students .st', { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .5, stagger: .15, ease: 'back.out(2)' }, 57.6);
+const byN = set => $$(`#cubes .cube[data-set="${set}"]`).sort((a, b) => a.dataset.n - b.dataset.n);
+const drop = (els, at, each) => tl.fromTo(els, { autoAlpha: 0, y: -50 }, { autoAlpha: 1, y: 0, duration: .3, stagger: each, ease: 'back.out(2)' }, at);
+drop(byN('b'), 57.9, .08);                                   // bear, bottom-up
+tl.fromTo('#bearFace polygon', { autoAlpha: 0 }, { autoAlpha: 1, duration: .3, stagger: .1 }, 60.3);
+drop(byN('f'), 59.4, .035);                                  // forest
+tl.fromTo(byN('p'), { autoAlpha: 0, scale: .2, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, duration: .35, stagger: .04, ease: 'back.out(2)' }, 60.0);   // pond fills in
+draw('#pondFx', 60.8, .9);
+tl.fromTo('#pondFx ellipse', { scale: .6, transformOrigin: '50% 50%' }, { scale: 1.15, duration: 1.2, yoyo: true, repeat: 5, ease: 'sine.inOut' }, 61.4);
+tl.fromTo('#tags text', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .5, stagger: .25, ease: 'back.out(2)' }, 61.0);
+tl.fromTo('#students .kb', { y: 0 }, { y: -14, duration: .3, yoyo: true, repeat: 5, stagger: .1, ease: 'power1.out' }, 60.6);
+sub('sub8', 61.8, 65.6);
+draw('#camp', 61.9, 1.4);
+tl.set('#kids', { autoAlpha: 1 }, 62.2);
+tl.fromTo('#kids .kid', { x: (i, e) => e.classList.contains('kl') ? -900 : 900 }, { x: 0, duration: 1.6, stagger: .12, ease: 'power1.out' }, 62.2);
+tl.fromTo('#kids .kb', { y: 0 }, { y: -7, duration: .2, yoyo: true, repeat: 7, stagger: .12, ease: 'sine.inOut' }, 62.2);
+sub('sub9', 65.8, 70.4);
+draw('#hands', 65.4, 1.0);
+tl.fromTo('#kids .kb', { y: 0 }, { y: -24, duration: .28, yoyo: true, repeat: 5, stagger: .05, ease: 'power1.out', immediateRender: false }, 66.5);
+tl.fromTo('#sparks path', { autoAlpha: 0, scale: 0, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, rotation: 90, duration: .6, stagger: .2, ease: 'back.out(3)' }, 66.6);
+
+// ---------- 第五幕 歡迎加入國際新視界 ----------
+tl.addLabel('s5', 70.4);
+tl.to('#s4', { autoAlpha: 0, duration: .7 }, 70.4);
+tl.set('#s5', { autoAlpha: 1 }, 71.0);
+const P8 = 'M-120,620 C300,380 640,760 960,560 S1600,360 2060,520';
+fly(P8, 71.0, 3.0, { parent: '#s5', scale: 1.2 });
+tl.fromTo('#c5r', { attr: { width: 0 } }, { attr: { width: 1920 }, duration: 3.0, ease: 'power1.inOut' }, 71.0);
+draw('#ul5', 73.8, .9);
+tl.fromTo('#stars5 path', { autoAlpha: 0, scale: 0, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, rotation: 90, duration: .6, stagger: .15, ease: 'back.out(3)' }, 74.2);
+tl.fromTo('#en5', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .8 }, 74.6);
+tl.to('#stars5 path', { scale: .55, duration: .45, yoyo: true, repeat: 3, stagger: .12, ease: 'sine.inOut' }, 75.0);
+tl.fromTo('#s5 > g[clip-path]', { y: 0 }, { y: -8, duration: 1.1, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 74.8);
+tl.to({}, { duration: 1 }, 76);
+
+// plane is always "in the air": gentle bob + roll, and wind streaks streaming behind it
+tl.fromTo('#planeBob', { y: -1.5, rotation: -3 }, { y: 1.5, rotation: 3, transformOrigin: '50% 50%', duration: .55, yoyo: true, repeat: 139, ease: 'sine.inOut' }, 0);
+tl.fromTo('#plane .wind', { strokeDashoffset: 0 }, { strokeDashoffset: 24 * 450, duration: 77, ease: 'none' }, 0);
+
+/* ================= hand-drawn "boiling" lines ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduce) { let n = 1; setInterval(() => $('#turb').setAttribute('seed', (n = n % 4 + 1)), 120); }
+
+/* ================= controls ================= */
+const btnPlay = $('#btnPlay'), dots = $$('#dots button');
+const scrub = $('#scrub'), fill = $('#fill'), knob = $('#knob'), tip = $('#tip'), clock = $('#clock');
+const DUR = tl.duration(), fmt = t => t.toFixed(1) + 's';
+const order = ['s1', 's2', 's3', 's4', 's5'];
+function syncPlay() { const p = tl.paused() || tl.progress() === 1; btnPlay.textContent = p ? '▶' : '❚❚'; btnPlay.setAttribute('aria-label', p ? '播放' : '暫停'); }
+tl.eventCallback('onUpdate', () => {
+  const pc = tl.progress() * 100 + '%';
+  fill.style.width = pc; knob.style.left = pc;
+  clock.textContent = `${fmt(tl.time())} / ${fmt(DUR)}`;
+  scrub.setAttribute('aria-valuenow', tl.time().toFixed(1));
+  let cur = 0; order.forEach((l, i) => { if (tl.time() >= tl.labels[l] - .01) cur = i; });
+  dots.forEach((d, i) => d.classList.toggle('on', i === cur));
+});
+tl.eventCallback('onComplete', syncPlay);
+const go = l => { tl.seek(l, false); if (tl.progress() === 1) tl.pause(); syncPlay(); };
+dots.forEach(d => d.addEventListener('click', () => go(d.dataset.l)));
+btnPlay.addEventListener('click', () => { if (tl.progress() === 1) tl.restart(); else tl.paused(!tl.paused()); syncPlay(); });
+$('#btnReplay').addEventListener('click', () => { tl.restart(); syncPlay(); });
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); btnPlay.click(); }
+  const cur = dots.findIndex(d => d.classList.contains('on'));
+  if (e.key === 'ArrowRight' && cur < 4) go(order[cur + 1]);
+  if (e.key === 'ArrowLeft') go(order[Math.max(0, tl.time() - tl.labels[order[cur]] > 1.5 ? cur : cur - 1)]);
+  // , / . step 0.1s (hold Shift for 1s) — paused, for pinpointing a moment
+  if (e.key === ',' || e.key === '<' || e.key === '.' || e.key === '>') {
+    const step = (e.shiftKey ? 1 : .1) * (e.key === ',' || e.key === '<' ? -1 : 1);
+    tl.pause(); seekTo(tl.time() + step);
+  }
+});
+
+/* ================= time bar ================= */
+scrub.setAttribute('aria-valuemax', DUR.toFixed(1));
+clock.textContent = `0.0s / ${fmt(DUR)}`;
+$('#marks').innerHTML = order.map((l, i) => `<div class="mark" style="left:${tl.labels[l] / DUR * 100}%"><b>${i + 1}</b></div>`).join('');
+const timeAt = x => { const r = $('#track').getBoundingClientRect(); return Math.max(0, Math.min(1, (x - r.left) / r.width)) * DUR; };
+function seekTo(t) { tl.seek(Math.max(0, Math.min(DUR, Math.round(t * 10) / 10)), false); syncPlay(); }
+function showTip(t, x) { const r = scrub.getBoundingClientRect(); tip.textContent = fmt(t); tip.style.left = (x - r.left) + 'px'; }
+let resume = false;
+scrub.addEventListener('pointerdown', e => {
+  scrub.setPointerCapture(e.pointerId); scrub.classList.add('drag');
+  resume = !tl.paused() && tl.progress() < 1; tl.pause();
+  const t = timeAt(e.clientX); seekTo(t); showTip(t, e.clientX);
+});
+scrub.addEventListener('pointermove', e => {
+  const t = timeAt(e.clientX); showTip(t, e.clientX);
+  if (scrub.classList.contains('drag')) seekTo(t);
+});
+const endDrag = () => { if (!scrub.classList.contains('drag')) return; scrub.classList.remove('drag'); if (resume) tl.play(); syncPlay(); };
+scrub.addEventListener('pointerup', endDrag);
+scrub.addEventListener('pointercancel', endDrag);
+
+let idleT;
+function wake() {
+  document.body.classList.remove('idle'); clearTimeout(idleT);
+  idleT = setTimeout(() => { if (!tl.paused() && tl.progress() < 1 && !scrub.classList.contains('drag')) document.body.classList.add('idle'); }, 2500);
+}
+['pointermove', 'pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, wake, { passive: true }));
+tl.eventCallback('onComplete', () => { syncPlay(); wake(); });
+wake();
+
+const toast = $('#toast'); let toastT;
+clock.addEventListener('click', () => {
+  const s = fmt(tl.time());
+  (navigator.clipboard ? navigator.clipboard.writeText(s) : Promise.reject()).then(() => { toast.textContent = `已複製時間 ${s}`; }, () => { toast.textContent = `目前時間 ${s}`; })
+    .finally(() => { toast.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => toast.style.opacity = 0, 1400); });
+});
+
+/* ================= music: locked to the timeline =================
+   starts at 6.0s · each pass eases out over its last beats, then a short breath so the next pass
+   re-enters on the downbeat of the next bar (小苗快長大 ≈ 142 BPM, bar ≈ 1.69s) · whole film fades out over the last 3s */
+const MUSIC_START = 6.0, MUSIC_FADE = 3;
+const BAR = 4 * 0.4225, TAIL_FADE = 1.2, HEAD_FADE = .08;
+let MUSIC_GAP = .4;
+const musicGap = len => { let g = Math.ceil(len / BAR) * BAR - len; if (g < .3) g += BAR; return g; };
+const bgm = $('#bgm'), btnMusic = $('#btnMusic');
+let musicOn = true, musicOk = true, blocked = false, justUnlocked = false;
+function noMusic() { musicOk = false; btnMusic.disabled = true; btnMusic.classList.remove('on'); btnMusic.title = '找不到音樂檔：請把「小苗快長大 (2).mp3」放在同一資料夾'; }
+bgm.addEventListener('error', noMusic);
+['loadedmetadata', 'durationchange'].forEach(ev => bgm.addEventListener(ev, () => { if (bgm.duration) MUSIC_GAP = musicGap(bgm.duration); }));
+if (bgm.duration) MUSIC_GAP = musicGap(bgm.duration);   // metadata may already be loaded
+function musicTarget() {   // where the track should be at the current timeline time (null = silent)
+  const t = tl.time(), len = bgm.duration;
+  if (!len || t < MUSIC_START || t >= DUR - .05) return null;
+  const within = (t - MUSIC_START) % (len + MUSIC_GAP);
+  return within < len ? within : null;
+}
+gsap.ticker.add(() => {
+  if (!musicOk) return;
+  const pos = musicTarget(), running = !tl.paused() && tl.progress() < 1 && !scrub.classList.contains('drag');
+  const clamp = v => Math.max(0, Math.min(1, v)), len = bgm.duration || 1;
+  const ease = pos === null ? 0 : Math.min(clamp(pos / HEAD_FADE), Math.sin(clamp((len - pos) / TAIL_FADE) * Math.PI / 2));
+  bgm.volume = clamp((DUR - tl.time()) / MUSIC_FADE) * ease;
+  if (!musicOn || pos === null || !running) { if (!bgm.paused) bgm.pause(); if (pos !== null && Math.abs(bgm.currentTime - pos) > .25) bgm.currentTime = pos; return; }
+  if (Math.abs(bgm.currentTime - pos) > .3) bgm.currentTime = pos;
+  if (bgm.paused && !blocked) bgm.play().catch(e => { if (e.name === 'NotAllowedError') { blocked = true; btnMusic.title = '瀏覽器擋住自動播放：點一下畫面或按 ♪ 開始音樂'; } });
+});
+// browsers only allow sound after a user gesture — the first click / key unlocks it
+const unlock = () => { if (blocked) { blocked = false; justUnlocked = true; setTimeout(() => justUnlocked = false, 400); btnMusic.title = '背景音樂'; } };
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlock));
+btnMusic.addEventListener('click', () => {
+  if (justUnlocked) { musicOn = true; btnMusic.classList.add('on'); return; }   // this click was the unlock
+  musicOn = !musicOn;
+  btnMusic.classList.toggle('on', musicOn);
+  if (!musicOn) bgm.pause();
+});
+btnMusic.classList.add('on');
+
+/* ================= start once fonts are ready ================= */
+Promise.race([
+  Promise.all([document.fonts.load('700 60px "LXGW WenKai TC"', '多元選修到底要選什麼國際新視界內壢高中一起認真的玩快樂的學'), document.fonts.load('700 60px "Caveat"', 'Who am I')]),
+  new Promise(r => setTimeout(r, 3000))
+]).finally(() => { tl.play(0); syncPlay(); });
+</script>
+</body>
+</html>
