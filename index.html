@@ -868,6 +868,7 @@ let MUSIC_GAP = .4;
 const musicGap = len => { let g = Math.ceil(len / BAR) * BAR - len; if (g < .3) g += BAR; return g; };
 const bgm = $('#bgm'), btnMusic = $('#btnMusic');
 let musicOn = true, musicOk = true, blocked = false, justUnlocked = false;
+const exit = { v: 1 };   // extra volume factor, faded to 0 by the 「請點擊」 button
 function noMusic() { musicOk = false; btnMusic.disabled = true; btnMusic.classList.remove('on'); btnMusic.title = '找不到音樂檔：請把「小苗快長大 (2).mp3」放在同一資料夾'; }
 bgm.addEventListener('error', noMusic);
 ['loadedmetadata', 'durationchange'].forEach(ev => bgm.addEventListener(ev, () => { if (bgm.duration) MUSIC_GAP = musicGap(bgm.duration); }));
@@ -883,7 +884,7 @@ gsap.ticker.add(() => {
   const pos = musicTarget(), running = !tl.paused() && tl.progress() < 1 && !scrub.classList.contains('drag');
   const clamp = v => Math.max(0, Math.min(1, v)), len = bgm.duration || 1;
   const ease = pos === null ? 0 : Math.min(clamp(pos / HEAD_FADE), Math.sin(clamp((len - pos) / TAIL_FADE) * Math.PI / 2));
-  bgm.volume = clamp((DUR - tl.time()) / MUSIC_FADE) * ease;
+  bgm.volume = clamp((DUR - tl.time()) / MUSIC_FADE) * ease * exit.v;
   if (!musicOn || pos === null || !running) { if (!bgm.paused) bgm.pause(); if (pos !== null && Math.abs(bgm.currentTime - pos) > .25) bgm.currentTime = pos; return; }
   if (Math.abs(bgm.currentTime - pos) > .3) bgm.currentTime = pos;
   if (bgm.paused && !blocked) bgm.play().catch(e => { if (e.name === 'NotAllowedError') { blocked = true; btnMusic.title = '瀏覽器擋住自動播放：點一下畫面或按 ♪ 開始音樂'; } });
@@ -895,9 +896,14 @@ btnMusic.addEventListener('click', () => {
   if (justUnlocked) { musicOn = true; btnMusic.classList.add('on'); return; }   // this click was the unlock
   musicOn = !musicOn;
   btnMusic.classList.toggle('on', musicOn);
+  gsap.killTweensOf(exit); exit.v = 1;
   if (!musicOn) bgm.pause();
 });
 btnMusic.classList.add('on');
+// clicking 「請點擊」 fades the music out over 1.5s, then turns it off (♪ brings it back)
+$('#watch').addEventListener('click', () => {
+  gsap.to(exit, { v: 0, duration: 1.5, ease: 'sine.out', onComplete: () => { musicOn = false; btnMusic.classList.remove('on'); bgm.pause(); } });
+});
 
 /* ================= start once fonts are ready ================= */
 Promise.race([
