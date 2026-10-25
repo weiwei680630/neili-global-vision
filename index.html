@@ -92,6 +92,12 @@
   #ctrl{bottom:30px}
   #dots,#clock,.mark b{display:none}
   #clock{font-family:var(--en);font-size:22px;min-width:118px;text-align:center;font-variant-numeric:tabular-nums;cursor:copy;user-select:none}
+  #watch{position:fixed;left:50%;bottom:100px;display:flex;flex-direction:column;align-items:center;gap:10px;
+    color:#fff;text-decoration:none;z-index:5;visibility:hidden}
+  #watch .pb{width:84px;height:84px;display:grid;place-items:center;font-size:36px;padding-left:6px;box-sizing:border-box;
+    background:rgba(255,255,255,.08);border:3px solid #fff;border-radius:255px 25px 225px 25px/25px 225px 25px 255px;transition:background .2s,color .2s,transform .2s}
+  #watch:hover .pb,#watch:focus-visible .pb{background:#fff;color:var(--blue);transform:scale(1.08)}
+  #watch span{font-size:clamp(20px,2.4vw,32px);letter-spacing:.1em}
   #scrub{position:fixed;left:16px;right:16px;bottom:4px;height:24px;cursor:pointer;touch-action:none;outline:none}
   #track{position:absolute;left:0;right:0;top:11px;height:3px;background:rgba(255,255,255,.25);border-radius:2px}
   #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff;border-radius:2px}
@@ -155,6 +161,11 @@
 </svg>
 
 <div id="flash"></div>
+
+<a id="watch" href="https://www.youtube.com/watch?v=17L4_p6xEBM" target="_blank" rel="noopener" aria-label="播放影片">
+  <div class="pb">▶</div>
+  <span>請點擊</span>
+</a>
 
 <div id="flip">
   <div class="page" id="page1"><div class="pgin">
@@ -769,6 +780,7 @@ tl.fromTo('#stars5 path', { autoAlpha: 0, scale: 0, transformOrigin: '50% 50%' }
 tl.fromTo('#en5', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .8 }, 74.6);
 tl.to('#stars5 path', { scale: .55, duration: .45, yoyo: true, repeat: 3, stagger: .12, ease: 'sine.inOut' }, 75.0);
 tl.fromTo('#s5 > g[clip-path]', { y: 0 }, { y: -8, duration: 1.1, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 74.8);
+tl.fromTo('#watch', { autoAlpha: 0, xPercent: -50, y: 30 }, { autoAlpha: 1, xPercent: -50, y: 0, duration: .8, ease: 'back.out(2)' }, 75.2);
 tl.to({}, { duration: 1 }, 76);
 
 // plane is always "in the air": gentle bob + roll, and wind streaks streaming behind it
