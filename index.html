@@ -569,12 +569,12 @@ const KIDS = [];
 $('#s5').innerHTML = `
   <defs><clipPath id="c5"><rect id="c5r" x="0" y="0" width="0" height="1080"/></clipPath></defs>
   <g clip-path="url(#c5)">
-    ${txt(960, 430, '歡迎加入', 100, 'zh', ' letter-spacing="14"')}
-    ${txt(960, 630, '國際新視界', 184, 'zh b', ' letter-spacing="16"')}
+    ${txt(960, 280, '歡迎加入', 100, 'zh', ' letter-spacing="14"')}
+    ${txt(960, 480, '國際新視界', 184, 'zh b', ' letter-spacing="16"')}
   </g>
-  <g id="ul5">${P('M500,684 C760,716 1120,652 1420,692')}${P('M600,716 C860,734 1080,704 1310,720', 'thin')}</g>
-  <g id="stars5" class="nodraw">${star(430, 360, 26)}${star(1500, 330, 20)}${star(1480, 760, 16)}${star(380, 740, 14)}${star(1640, 520, 12)}</g>
-  <text id="en5" x="960" y="820" class="zh b" font-size="58" text-anchor="middle" letter-spacing="6">一起認真的玩、快樂的學！</text>`;
+  <g id="ul5">${P('M500,534 C760,566 1120,502 1420,542')}${P('M600,566 C860,584 1080,554 1310,570', 'thin')}</g>
+  <g id="stars5" class="nodraw">${star(430, 210, 26)}${star(1500, 180, 20)}${star(1480, 610, 16)}${star(380, 590, 14)}${star(1640, 370, 12)}</g>
+  <text id="en5" x="960" y="670" class="zh b" font-size="58" text-anchor="middle" letter-spacing="6">一起認真的玩、快樂的學！</text>`;
 
 // Scene 1 per-character text
 $('#who').innerHTML = [...'Who am I ?'].map(c => `<tspan>${c === ' ' ? '&#160;' : c}</tspan>`).join('');
