@@ -92,12 +92,58 @@
   #ctrl{bottom:30px}
   #dots,#clock,.mark b{display:none}
   #clock{font-family:var(--en);font-size:22px;min-width:118px;text-align:center;font-variant-numeric:tabular-nums;cursor:copy;user-select:none}
-  #watch{position:fixed;left:50%;bottom:100px;display:flex;flex-direction:column;align-items:center;gap:10px;
-    color:#fff;text-decoration:none;z-index:5;visibility:hidden}
-  #watch .pb{width:84px;height:84px;display:grid;place-items:center;font-size:36px;padding-left:6px;box-sizing:border-box;
+  #endBtns{position:fixed;left:50%;bottom:100px;display:flex;align-items:flex-start;gap:clamp(48px,9vw,140px);z-index:5;visibility:hidden}
+  .endbtn{display:flex;flex-direction:column;align-items:center;gap:10px;color:#fff;text-decoration:none;
+    background:none;border:0;padding:0;font:inherit;cursor:pointer}
+  .endbtn .pb{width:84px;height:84px;display:grid;place-items:center;font-size:36px;box-sizing:border-box;color:#fff;
     background:rgba(255,255,255,.08);border:3px solid #fff;border-radius:255px 25px 225px 25px/25px 225px 25px 255px;transition:background .2s,color .2s,transform .2s}
-  #watch:hover .pb,#watch:focus-visible .pb{background:#fff;color:var(--blue);transform:scale(1.08)}
-  #watch span{font-size:clamp(20px,2.4vw,32px);letter-spacing:.1em}
+  #watch .pb{padding-left:6px}
+  .endbtn .pb svg{width:42px;height:42px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .endbtn:hover .pb,.endbtn:focus-visible .pb{background:#fff;color:var(--blue);transform:scale(1.08)}
+  .endbtn span{font-size:clamp(20px,2.4vw,32px);letter-spacing:.1em}
+
+  /* ---------- 選課須知 card ---------- */
+  #guide{width:min(1080px,calc(100% - 32px));max-height:calc(100% - 32px);box-sizing:border-box;padding:0;margin:auto;
+    color:#fff;font-family:var(--zh);background-color:var(--blue);
+    background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+    background-size:44px 44px;border:3px solid #fff;border-radius:36px 10px 28px 12px/12px 30px 10px 34px;
+    box-shadow:0 20px 60px rgba(5,20,60,.55);overflow:auto}
+  #guide::backdrop{background:rgba(8,24,64,.6)}
+  #guide[open]{animation:guideIn .35s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes guideIn{from{opacity:0;transform:translateY(24px) scale(.96)}}
+  .gin{padding:clamp(20px,4vw,48px)}
+  .gx{position:sticky;top:14px;float:right;margin:-6px -6px 0 0;width:44px;height:44px;font:700 26px var(--en);line-height:1;
+    color:#fff;background:var(--blue);border:2px solid #fff;border-radius:255px 15px 225px 15px/15px 225px 15px 255px;cursor:pointer}
+  .gx:hover,.gx:focus-visible{background:#fff;color:var(--blue)}
+  .ghead{text-align:center;margin-bottom:clamp(20px,3vw,36px)}
+  .gtag{display:inline-block;padding:4px 16px;border:2px solid #fff;border-radius:255px 15px 225px 15px/15px 225px 15px 255px;
+    font-size:clamp(16px,1.8vw,22px);letter-spacing:.08em}
+  .ghead h2{margin:10px 0 0;font-size:clamp(36px,5.4vw,68px);letter-spacing:.12em;line-height:1.15}
+  .ghead .en{font-family:var(--en);font-weight:700;font-size:clamp(24px,3vw,38px);opacity:.9}
+  .ghead p{margin:6px 0 0;font-size:clamp(15px,1.6vw,20px);opacity:.85}
+  .ggrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,28px)}
+  .gsec{border:2px dashed rgba(255,255,255,.55);border-radius:18px 8px 16px 10px/10px 16px 8px 18px;padding:16px 18px 18px}
+  .gsec.wide{grid-column:1/-1}
+  .gsec h3{margin:0 0 12px;font-size:clamp(20px,2.2vw,28px);letter-spacing:.06em}
+  .gsec h3 small{font-family:var(--en);font-weight:700;font-size:.85em;opacity:.75;margin-left:6px;letter-spacing:0}
+  .gsec ul,.gsec ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+  .gsec li{display:flex;gap:10px;align-items:baseline;padding:7px 12px;border-left:4px solid #fff;
+    background:rgba(255,255,255,.08);border-radius:0 10px 10px 0;font-size:clamp(15px,1.55vw,19px);line-height:1.45}
+  .gsec li b{font-family:var(--en);font-size:1.15em;white-space:nowrap;min-width:3.6em}
+  .gphase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .gphase h4{margin:0 0 8px;font-size:clamp(16px,1.7vw,21px);font-weight:700}
+  .gphase h4 small{font-family:var(--en);opacity:.75;margin-left:4px}
+  .gphase li{gap:8px;padding:7px 10px}
+  .gphase li b{min-width:2.9em}
+  .gsec ol li b{min-width:1.4em}
+  .gscore li{display:grid;grid-template-columns:1fr auto;gap:4px 10px}
+  .gscore li b{grid-column:2;grid-row:1;text-align:right;min-width:0}
+  .gscore i{grid-column:1/-1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+  .gscore i::after{content:"";display:block;height:100%;width:var(--w);background:#fff;border-radius:3px}
+  .gfoot{margin-top:clamp(20px,3vw,32px);text-align:center}
+  .gfoot .en{font-family:var(--en);font-weight:700;font-size:clamp(26px,3.2vw,42px)}
+  .gfoot p{margin:4px 0 0;font-size:clamp(16px,1.8vw,22px);letter-spacing:.06em}
+  @media (max-width:760px){ .ggrid,.gphase{grid-template-columns:1fr} }
   #scrub{position:fixed;left:16px;right:16px;bottom:4px;height:24px;cursor:pointer;touch-action:none;outline:none}
   #track{position:absolute;left:0;right:0;top:11px;height:3px;background:rgba(255,255,255,.25);border-radius:2px}
   #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff;border-radius:2px}
@@ -116,6 +162,9 @@
     #dots button{min-width:28px;height:28px;font-size:16px}
     .sub{bottom:calc(5vh + 40px)}
     .sub.low{bottom:76px}
+    #endBtns{bottom:96px}
+    .endbtn .pb{width:68px;height:68px;font-size:30px}
+    .endbtn .pb svg{width:34px;height:34px}
   }
 </style>
 </head>
@@ -162,10 +211,83 @@
 
 <div id="flash"></div>
 
-<a id="watch" href="https://www.youtube.com/watch?v=17L4_p6xEBM" target="_blank" rel="noopener" aria-label="播放影片">
-  <div class="pb">▶</div>
-  <span>請點擊</span>
-</a>
+<div id="endBtns">
+  <button id="guideBtn" class="endbtn" type="button" aria-haspopup="dialog" aria-label="選課須知">
+    <div class="pb"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 6.5h14.5l5 5V33a1.5 1.5 0 0 1-1.5 1.5H11A1.5 1.5 0 0 1 9.5 33V8A1.5 1.5 0 0 1 11 6.5z"/><path d="M25.5 6.5v5h5M14.5 18h11M14.5 23h11M14.5 28h7"/></svg></div>
+    <span>選課須知</span>
+  </button>
+  <a id="watch" class="endbtn" href="https://www.youtube.com/watch?v=17L4_p6xEBM" target="_blank" rel="noopener" aria-label="播放影片">
+    <div class="pb">▶</div>
+    <span>請點擊</span>
+  </a>
+</div>
+
+<dialog id="guide" aria-labelledby="guideTitle">
+  <div class="gin">
+    <button class="gx" type="button" aria-label="關閉">×</button>
+    <header class="ghead">
+      <div class="gtag">115-2 高一多元選修｜選課須知</div>
+      <h2 id="guideTitle">國際新視界</h2>
+      <div class="en">The World, My World</div>
+      <p>授課教師：國際新視界社群教師</p>
+    </header>
+    <div class="ggrid">
+      <section class="gsec wide">
+        <h3>課程規劃<small>W1 – W18</small></h3>
+        <div class="gphase">
+          <div><h4>基礎篇<small>W1-6</small></h4><ul>
+            <li><b>W1-3</b>環境永續相關主題探討</li>
+            <li><b>W4-5</b>Minecraft 基本指令練習</li>
+            <li><b>W6</b>Minecraft 函數練習</li></ul></div>
+          <div><h4>程式建模篇<small>W7-12</small></h4><ul>
+            <li><b>W7-8</b>空間座標與指令、填積木實作</li>
+            <li><b>W9-10</b>三維球體生成與裝置藝術</li>
+            <li><b>W11-12</b>紅石機關密室與 AI 繪圖創作</li></ul></div>
+          <div><h4>發表與反思篇<small>W13-18</small></h4><ul>
+            <li><b>W13-15</b>密室世界建造與雙語關卡</li>
+            <li><b>W16-17</b>成果發表與永續寒假營隊任務選定</li>
+            <li><b>W18</b>課程反思與學習歷程整理撰寫</li></ul></div>
+        </div>
+      </section>
+      <section class="gsec">
+        <h3>評分標準</h3>
+        <ul class="gscore">
+          <li>個人平時實作作業<b>50%</b><i style="--w:50%"></i></li>
+          <li>期末成果發表<b>20%</b><i style="--w:20%"></i></li>
+          <li>小組作業 15% ＋ 課堂參與 15%<b>30%</b><i style="--w:30%"></i></li>
+        </ul>
+      </section>
+      <section class="gsec">
+        <h3>作業內容：多元專案任務</h3>
+        <ol>
+          <li><b>1.</b>英文電子書創作</li>
+          <li><b>2.</b>英文 NPC 設計</li>
+          <li><b>3.</b>麥塊建模</li>
+        </ol>
+      </section>
+      <section class="gsec">
+        <h3>學習成果：亮眼實踐</h3>
+        <ol>
+          <li><b>1.</b>完整的 3D 麥塊永續倡議世界</li>
+          <li><b>2.</b>國際交流與短講發表記錄</li>
+          <li><b>3.</b>具備高含金量的學習歷程檔案</li>
+        </ol>
+      </section>
+      <section class="gsec">
+        <h3>選課提醒：合適的學習夥伴</h3>
+        <ol>
+          <li><b>1.</b>熱愛 Minecraft 建模與 AI 科技</li>
+          <li><b>2.</b>樂於用基礎英文參與跨國交流</li>
+          <li><b>3.</b>能配合部分課外視訊交流時段（不計為出席率）</li>
+        </ol>
+      </section>
+    </div>
+    <footer class="gfoot">
+      <div class="en">Build Your World!</div>
+      <p>歡迎加入國際新視界！用 Minecraft 建築夢想・用科技連結世界</p>
+    </footer>
+  </div>
+</dialog>
 
 <div id="flip">
   <div class="page" id="page1"><div class="pgin">
@@ -780,7 +902,7 @@ tl.fromTo('#stars5 path', { autoAlpha: 0, scale: 0, transformOrigin: '50% 50%' }
 tl.fromTo('#en5', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .8 }, 74.6);
 tl.to('#stars5 path', { scale: .55, duration: .45, yoyo: true, repeat: 3, stagger: .12, ease: 'sine.inOut' }, 75.0);
 tl.fromTo('#s5 > g[clip-path]', { y: 0 }, { y: -8, duration: 1.1, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 74.8);
-tl.fromTo('#watch', { autoAlpha: 0, xPercent: -50, y: 30 }, { autoAlpha: 1, xPercent: -50, y: 0, duration: .8, ease: 'back.out(2)' }, 75.2);
+tl.fromTo('#endBtns', { autoAlpha: 0, xPercent: -50, y: 30 }, { autoAlpha: 1, xPercent: -50, y: 0, duration: .8, ease: 'back.out(2)' }, 75.2);
 tl.to({}, { duration: 1 }, 76);
 
 // plane is always "in the air": gentle bob + roll, and wind streaks streaming behind it
@@ -792,7 +914,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (!reduce) { let n = 1; setInterval(() => $('#turb').setAttribute('seed', (n = n % 4 + 1)), 120); }
 
 /* ================= controls ================= */
-const btnPlay = $('#btnPlay'), dots = $$('#dots button');
+const btnPlay = $('#btnPlay'), dots = $$('#dots button'), guide = $('#guide');
 const scrub = $('#scrub'), fill = $('#fill'), knob = $('#knob'), tip = $('#tip'), clock = $('#clock');
 const DUR = tl.duration(), fmt = t => t.toFixed(1) + 's';
 const order = ['s1', 's2', 's3', 's4', 's5'];
@@ -811,6 +933,7 @@ dots.forEach(d => d.addEventListener('click', () => go(d.dataset.l)));
 btnPlay.addEventListener('click', () => { if (tl.progress() === 1) tl.restart(); else tl.paused(!tl.paused()); syncPlay(); });
 $('#btnReplay').addEventListener('click', () => { tl.restart(); syncPlay(); });
 addEventListener('keydown', e => {
+  if (guide.open) return;   // the 選課須知 card has its own keys (Esc closes it)
   if (e.code === 'Space') { e.preventDefault(); btnPlay.click(); }
   const cur = dots.findIndex(d => d.classList.contains('on'));
   if (e.key === 'ArrowRight' && cur < 4) go(order[cur + 1]);
@@ -904,6 +1027,11 @@ btnMusic.classList.add('on');
 $('#watch').addEventListener('click', () => {
   gsap.to(exit, { v: 0, duration: 1.5, ease: 'sine.out', onComplete: () => { musicOn = false; btnMusic.classList.remove('on'); bgm.pause(); } });
 });
+
+/* ================= 選課須知 card ================= */
+$('#guideBtn').addEventListener('click', () => guide.showModal());
+$('#guide .gx').addEventListener('click', () => guide.close());
+guide.addEventListener('click', e => { if (e.target === guide) guide.close(); });   // click the backdrop to close
 
 /* ================= start once fonts are ready ================= */
 Promise.race([
