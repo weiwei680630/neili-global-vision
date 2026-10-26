@@ -104,31 +104,31 @@
 
   /* ---------- 選課須知 card ---------- */
   #guide{width:min(1080px,calc(100% - 32px));max-height:calc(100% - 32px);box-sizing:border-box;padding:0;margin:auto;
-    color:#fff;font-family:var(--zh);background-color:var(--blue);
-    background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
-    background-size:44px 44px;border:3px solid #fff;border-radius:36px 10px 28px 12px/12px 30px 10px 34px;
+    color:var(--blue);font-family:var(--zh);background-color:#fff;
+    background-image:linear-gradient(rgba(31,79,163,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(31,79,163,.07) 1px,transparent 1px);
+    background-size:44px 44px;border:3px solid var(--blue);border-radius:36px 10px 28px 12px/12px 30px 10px 34px;
     box-shadow:0 20px 60px rgba(5,20,60,.55);overflow:auto}
   #guide::backdrop{background:rgba(8,24,64,.6)}
   #guide[open]{animation:guideIn .35s cubic-bezier(.2,1.4,.4,1)}
   @keyframes guideIn{from{opacity:0;transform:translateY(24px) scale(.96)}}
   .gin{padding:clamp(20px,4vw,48px)}
   .gx{position:sticky;top:14px;float:right;margin:-6px -6px 0 0;width:44px;height:44px;font:700 26px var(--en);line-height:1;
-    color:#fff;background:var(--blue);border:2px solid #fff;border-radius:255px 15px 225px 15px/15px 225px 15px 255px;cursor:pointer}
-  .gx:hover,.gx:focus-visible{background:#fff;color:var(--blue)}
+    color:var(--blue);background:#fff;border:2px solid var(--blue);border-radius:255px 15px 225px 15px/15px 225px 15px 255px;cursor:pointer}
+  .gx:hover,.gx:focus-visible{background:var(--blue);color:#fff}
   .ghead{text-align:center;margin-bottom:clamp(20px,3vw,36px)}
-  .gtag{display:inline-block;padding:4px 16px;border:2px solid #fff;border-radius:255px 15px 225px 15px/15px 225px 15px 255px;
+  .gtag{display:inline-block;padding:4px 16px;border:2px solid var(--blue);border-radius:255px 15px 225px 15px/15px 225px 15px 255px;
     font-size:clamp(16px,1.8vw,22px);letter-spacing:.08em}
   .ghead h2{margin:10px 0 0;font-size:clamp(36px,5.4vw,68px);letter-spacing:.12em;line-height:1.15}
   .ghead .en{font-family:var(--en);font-weight:700;font-size:clamp(24px,3vw,38px);opacity:.9}
   .ghead p{margin:6px 0 0;font-size:clamp(15px,1.6vw,20px);opacity:.85}
   .ggrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,28px)}
-  .gsec{border:2px dashed rgba(255,255,255,.55);border-radius:18px 8px 16px 10px/10px 16px 8px 18px;padding:16px 18px 18px}
+  .gsec{border:2px dashed rgba(31,79,163,.5);border-radius:18px 8px 16px 10px/10px 16px 8px 18px;padding:16px 18px 18px}
   .gsec.wide{grid-column:1/-1}
   .gsec h3{margin:0 0 12px;font-size:clamp(20px,2.2vw,28px);letter-spacing:.06em}
   .gsec h3 small{font-family:var(--en);font-weight:700;font-size:.85em;opacity:.75;margin-left:6px;letter-spacing:0}
   .gsec ul,.gsec ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}
-  .gsec li{display:flex;gap:10px;align-items:baseline;padding:7px 12px;border-left:4px solid #fff;
-    background:rgba(255,255,255,.08);border-radius:0 10px 10px 0;font-size:clamp(15px,1.55vw,19px);line-height:1.45}
+  .gsec li{display:flex;gap:10px;align-items:baseline;padding:7px 12px;border-left:4px solid var(--blue);
+    background:rgba(31,79,163,.07);border-radius:0 10px 10px 0;font-size:clamp(15px,1.55vw,19px);line-height:1.45}
   .gsec li b{font-family:var(--en);font-size:1.15em;white-space:nowrap;min-width:3.6em}
   .gphase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
   .gphase h4{margin:0 0 8px;font-size:clamp(16px,1.7vw,21px);font-weight:700}
@@ -138,12 +138,23 @@
   .gsec ol li b{min-width:1.4em}
   .gscore li{display:grid;grid-template-columns:1fr auto;gap:4px 10px}
   .gscore li b{grid-column:2;grid-row:1;text-align:right;min-width:0}
-  .gscore i{grid-column:1/-1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
-  .gscore i::after{content:"";display:block;height:100%;width:var(--w);background:#fff;border-radius:3px}
+  .gscore i{grid-column:1/-1;height:6px;border-radius:3px;background:rgba(31,79,163,.15);overflow:hidden}
+  .gscore i::after{content:"";display:block;height:100%;width:var(--w);background:var(--blue);border-radius:3px}
   .gfoot{margin-top:clamp(20px,3vw,32px);text-align:center}
   .gfoot .en{font-family:var(--en);font-weight:700;font-size:clamp(26px,3.2vw,42px)}
   .gfoot p{margin:4px 0 0;font-size:clamp(16px,1.8vw,22px);letter-spacing:.06em}
   @media (max-width:760px){ .ggrid,.gphase{grid-template-columns:1fr} }
+  /* ---------- video pop-up ---------- */
+  #vid{width:min(1080px,calc(100% - 32px),calc((100vh - 140px) * 16 / 9));box-sizing:border-box;padding:0;margin:auto;overflow:visible;
+    background:#000;border:3px solid #fff;border-radius:28px 10px 24px 12px/12px 26px 10px 30px;box-shadow:0 20px 60px rgba(5,20,60,.55)}
+  #vid::backdrop{background:rgba(8,24,64,.75)}
+  #vid[open]{animation:guideIn .35s cubic-bezier(.2,1.4,.4,1)}
+  #vid .vbox{aspect-ratio:16/9;border-radius:inherit;overflow:hidden}
+  #vid iframe{display:block;width:100%;height:100%;border:0}
+  #vid .gx{position:absolute;top:-22px;right:-22px;float:none;margin:0;z-index:1}
+  #vid .vlink{position:absolute;left:0;right:0;top:100%;margin-top:10px;text-align:center;font:16px var(--zh);color:#fff;opacity:.8}
+  #vid .vlink:hover{opacity:1}
+  @media (max-width:520px){ #vid .gx{top:-52px;right:0} }
   #scrub{position:fixed;left:16px;right:16px;bottom:4px;height:24px;cursor:pointer;touch-action:none;outline:none}
   #track{position:absolute;left:0;right:0;top:11px;height:3px;background:rgba(255,255,255,.25);border-radius:2px}
   #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff;border-radius:2px}
@@ -216,11 +227,17 @@
     <div class="pb"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 6.5h14.5l5 5V33a1.5 1.5 0 0 1-1.5 1.5H11A1.5 1.5 0 0 1 9.5 33V8A1.5 1.5 0 0 1 11 6.5z"/><path d="M25.5 6.5v5h5M14.5 18h11M14.5 23h11M14.5 28h7"/></svg></div>
     <span>選課須知</span>
   </button>
-  <a id="watch" class="endbtn" href="https://www.youtube.com/watch?v=17L4_p6xEBM" target="_blank" rel="noopener" aria-label="播放影片">
+  <button id="watch" class="endbtn" type="button" aria-haspopup="dialog" aria-label="播放影片">
     <div class="pb">▶</div>
     <span>請點擊</span>
-  </a>
+  </button>
 </div>
+
+<dialog id="vid" aria-label="影片">
+  <button class="gx" type="button" aria-label="關閉">×</button>
+  <div class="vbox"><iframe title="國際新視界 影片" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+  <a class="vlink" href="https://www.youtube.com/watch?v=17L4_p6xEBM" target="_blank" rel="noopener">無法播放？在 YouTube 開啟 ↗</a>
+</dialog>
 
 <dialog id="guide" aria-labelledby="guideTitle">
   <div class="gin">
@@ -236,17 +253,17 @@
         <h3>課程規劃<small>W1 – W18</small></h3>
         <div class="gphase">
           <div><h4>基礎篇<small>W1-6</small></h4><ul>
-            <li><b>W1-3</b>環境永續相關主題探討</li>
-            <li><b>W4-5</b>Minecraft 基本指令練習</li>
-            <li><b>W6</b>Minecraft 函數練習</li></ul></div>
+            <li><b>W1-2</b>認識社會創新競賽</li>
+            <li><b>W3-4</b>環境永續相關主題探討（認識 AI）</li>
+            <li><b>W5-6</b>Minecraft 基礎認識與電競比賽</li></ul></div>
           <div><h4>程式建模篇<small>W7-12</small></h4><ul>
-            <li><b>W7-8</b>空間座標與指令、填積木實作</li>
-            <li><b>W9-10</b>三維球體生成與裝置藝術</li>
-            <li><b>W11-12</b>紅石機關密室與 AI 繪圖創作</li></ul></div>
+            <li><b>W7-8</b>裝置藝術與程式設計</li>
+            <li><b>W9-10</b>裝置藝術與程式設計</li>
+            <li><b>W11-12</b>闖關遊戲設計、NPC 設計與指令應用</li>
+            <li><b>W13-14</b>遊戲設計與三角函數（AI 時代開啟與動物對話的契機）</li></ul></div>
           <div><h4>發表與反思篇<small>W13-18</small></h4><ul>
-            <li><b>W13-15</b>密室世界建造與雙語關卡</li>
-            <li><b>W16-17</b>成果發表與永續寒假營隊任務選定</li>
-            <li><b>W18</b>課程反思與學習歷程整理撰寫</li></ul></div>
+            <li><b>W15-16</b>成果發表與永續寒假營隊任務選定</li>
+            <li><b>W17-18</b>課程反思與學習歷程整理撰寫</li></ul></div>
         </div>
       </section>
       <section class="gsec">
@@ -914,7 +931,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (!reduce) { let n = 1; setInterval(() => $('#turb').setAttribute('seed', (n = n % 4 + 1)), 120); }
 
 /* ================= controls ================= */
-const btnPlay = $('#btnPlay'), dots = $$('#dots button'), guide = $('#guide');
+const btnPlay = $('#btnPlay'), dots = $$('#dots button'), guide = $('#guide'), vid = $('#vid');
 const scrub = $('#scrub'), fill = $('#fill'), knob = $('#knob'), tip = $('#tip'), clock = $('#clock');
 const DUR = tl.duration(), fmt = t => t.toFixed(1) + 's';
 const order = ['s1', 's2', 's3', 's4', 's5'];
@@ -933,7 +950,7 @@ dots.forEach(d => d.addEventListener('click', () => go(d.dataset.l)));
 btnPlay.addEventListener('click', () => { if (tl.progress() === 1) tl.restart(); else tl.paused(!tl.paused()); syncPlay(); });
 $('#btnReplay').addEventListener('click', () => { tl.restart(); syncPlay(); });
 addEventListener('keydown', e => {
-  if (guide.open) return;   // the 選課須知 card has its own keys (Esc closes it)
+  if (guide.open || vid.open) return;   // the 選課須知 card / video pop-up have their own keys (Esc closes them)
   if (e.code === 'Space') { e.preventDefault(); btnPlay.click(); }
   const cur = dots.findIndex(d => d.classList.contains('on'));
   if (e.key === 'ArrowRight' && cur < 4) go(order[cur + 1]);
@@ -1032,6 +1049,17 @@ $('#watch').addEventListener('click', () => {
 $('#guideBtn').addEventListener('click', () => guide.showModal());
 $('#guide .gx').addEventListener('click', () => guide.close());
 guide.addEventListener('click', e => { if (e.target === guide) guide.close(); });   // click the backdrop to close
+
+/* ================= video pop-up ================= */
+// the iframe only gets its src while open, so closing it really stops the video
+const vidFrame = $('#vid iframe');
+$('#watch').addEventListener('click', () => {
+  vidFrame.src = 'https://www.youtube.com/embed/17L4_p6xEBM?autoplay=1&rel=0&playsinline=1';
+  vid.showModal();
+});
+$('#vid .gx').addEventListener('click', () => vid.close());
+vid.addEventListener('click', e => { if (e.target === vid) vid.close(); });   // click the backdrop to close
+vid.addEventListener('close', () => { vidFrame.src = 'about:blank'; });
 
 /* ================= start once fonts are ready ================= */
 Promise.race([
